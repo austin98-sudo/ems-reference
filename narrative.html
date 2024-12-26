@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Narrative Generator</title>
+</head>
+<style>
+   * {
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    input[type="text"] {
+      width: 50%;
+    }
+
+    textarea {
+      font-size: medium;
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 0.5em;
+    }
+
+    .input-card {
+      background-color: #d6d3d1;
+      padding: 0.5em 1em;
+      border-radius: 5px;
+    }
+
+    div {
+      margin-bottom: 0.5em;
+    }
+
+    fieldset {
+      margin-bottom: 20px;
+    }
+
+    button {
+      margin-top: 10px;
+      margin-right: 5px;
+      padding: 1em 2em;
+      border-radius: 5px;
+      border: 1px solid transparent;
+      box-shadow: 1px 1px 2px gray;
+    }
+</style>
+<body>
+
+  <!--Dispatch-->
+  <div class="input-card">
+    <h1>Dispatch</h1>
+
+    <label>Station: 
+      <select id="station">
+        <option>Wintergreen station 1</option>
+        <option>Wintergreen station 2</option>
+      </select>
+    </label>
+
+    <label>EMD Complaint:
+      <input id="emdComplaint" type="text"/>
+    </label>
+
+    <label>Unit:
+      <input id="unit" type="text"/>
+    </label>
+
+    <label>Response mode:
+      <select id="responseMode">
+        <option>Lights and sirens</option>
+        <option>Light and no sirens</option>
+        <option>No lights and no sirens</option>
+      </select>
+    </label>
+
+    <label>Arrival:
+      <input id="arrival" type="text">
+    </label>
+  </div>
+
+  <!--Complaint-->
+  <div class="input-card">
+    <h1>Complaint</h1>
+    
+    <label>Complaint: 
+      <input type="text" id="complaint">
+    </label>
+  </div>
+
+  <!--History-->
+  <div class="input-card">
+    <h1>History</h1>
+    <textarea placeholder="Type entire H section here." rows="5" cols="100" id="history"></textarea>
+  </div>
+
+  <!--Assessment-->
+  <div class="input-card">
+    <h1>Assessment</h1>
+
+    <label>Age: 
+      <input type="number" id="age">
+    </label>
+
+    <label>Found: 
+      <input type="text" id="found">
+    </label>
+
+    <label>AAO Status:
+      <select id="AAO">
+        <option>AxOx4</option>
+        <option>AxOx3</option>
+        <option>AxOx2</option>
+        <option>AxOx1</option>
+      </select>
+    </label>
+
+    <label>Airway Patent:
+      <input type="checkbox" id="airwayPatent">
+    </label>
+
+    <textarea cols="100" rows="4" id="additionalAssessment" placeholder="Additional assessments"></textarea>
+  </div>
+
+  <!--RX-->
+  <div class="input-card">
+    <h1>RX</h1>
+    <textarea id="rxText" rows="3" cols="100">PTs vitals were initially obtained on scene inside of the ambulance. The PT was also monitored for the duration of the transport.</textarea>
+  </div>
+
+  <!--Transport-->
+  <div class="input-card">
+    <h1>Transport</h1>
+
+    <label>Hospital: 
+      <select id="transportHospital">
+        <option>UVA</option>
+        <option>Augusta Health</option>
+        <option>Lynchburg General</option>
+        <option>Martha Jefferson</option>
+      </select>
+    </label>
+
+    <label>Transport Mode:
+      <select id="transportMode">
+        <option>Non-emergent</option>
+        <option>Emergent</option>
+      </select>
+    </label>
+
+    <label>Report Method:
+      <select id="reportMethod">
+        <option>Phone</option>
+        <option>Radio</option>
+      </select>
+    </label>
+
+    <textarea id="transport" rows="5" cols="100"></textarea><br>
+    <button onclick="generateTransport()">Generate Transport</button>
+  </div>
+
+  <!--Exceptions-->
+  <div class="input-card">
+    <h1>Exceptions</h1>
+    
+    <textarea id="exceptions" rows="2" cols="100">None</textarea>
+  </div>
+
+  <div class="input-card">
+    <h1>Agreement</h1>
+    <label><input type="checkbox" id="agreement" onclick="agreementChange()"> I confirm that I have reviewed the generated EMS PCR template and made any necessary edits to ensure the accuracy, completeness, and grammatical correctness of the report. I acknowledge that it is my responsibility to ensure all information is truthful, detailed, and documented to the best of my ability, and that the report aligns with applicable protocols and standards of care.</label>
+    <button id="generateReport" onclick="generateReport()" disabled>Generate Report</button>
+  </div>
+
+  <div class="input-card">
+    <h1>Preview/Editing Area</h1>
+    <p style="background-color: red; padding: 5px;">!!REMEMBER TO READ OVER THE NARRATIVE AND MAKE CHANGES AS NEEDED!!</p>
+
+    <textarea cols="100" rows="25" id="preview"></textarea>
+  </div>
+</body>
+<script>
+  alert("Disclaimer: \n\nThis EMS PCR template generator is provided as a general tool to assist EMS providers in documenting patient care. Users are solely responsible for ensuring the accuracy, completeness, and detail of their reports. This template is not tailored to meet the specific requirements of every clinical scenario, regulatory standard, or jurisdiction. It is the responsibility of the provider to verify that the generated report aligns with applicable protocols, guidelines, and standards of care.\n\nProviders must ensure that all narratives and entries accurately reflect the events, assessments, and care provided to the best of their ability. Patient care reports are legal documents and may be reviewed in court or other legal proceedings. Inaccurate or incomplete documentation can have serious consequences, including legal or professional repercussions. Always exercise clinical judgment, document truthfully, and adhere to your organization’s policies when completing patient care documentation.");
+
+  function agreementChange() {
+    let checkbox = document.getElementById("agreement").checked;
+    document.getElementById("generateReport").disabled = (checkbox) ? false : true;
+  }
+
+  function generateTransport() {
+    let hospital = document.getElementById("transportHospital").value.toLowerCase();
+    let mode = document.getElementById("transportMode").value.toLowerCase()
+    let reportMethod = document.getElementById("reportMethod").value.toLowerCase()
+    
+    let transport = `PT was transported to ${hospital} due to being the closest facility. PT ambulated to ambulance with no assistance. Once in the ambulance the PT was secured with three safety belts. Transport began ${mode} to the facility. While en-route a ${reportMethod} was given stating the PT chief complaint and current vitals. Once at the facility a bedside report was given stating the same information from above. PT care was transferred.`
+
+    document.getElementById("transport").value = transport
+  }
+
+  function generateReport() {
+    let dispatch = `D- ${document.getElementById("station").value} was dispatched for ${document.getElementById("emdComplaint").value.toLowerCase()} at the above address. ${document.getElementById("unit").value} responded ${document.getElementById("responseMode").value.toLowerCase()}. On arrival the PT was ${document.getElementById("arrival").value.toLowerCase()}.`
+
+    let complaint = `C- PT's chief complaint was ${document.getElementById("complaint").value.toLowerCase()}.`
+
+    let history = `H- ${document.getElementById("history").value}.`
+
+    let assessment = `A- A ${document.getElementById("age").value} year old PT was ${document.getElementById("found").value.toLowerCase()}. The PT was ${document.getElementById("AAO").value} ${(document.getElementById("airwayPatent").checked ? 'with a patent airway':'')}. Vitals were obtained. ${document.getElementById("additionalAssessment").value}.`
+
+    let rx = document.getElementById("rxText").value
+
+    let transport = `T- ${document.getElementById("transport").value}`
+
+    let exceptions = `E- ${document.getElementById("exceptions").value}`
+
+    document.getElementById("preview").value = `${dispatch}\n\n${complaint}\n\n${history}\n\n${assessment}\n\n${rx}\n\n${transport}\n\n${exceptions}`
+  }
+</script>
+</html>
