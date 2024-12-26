@@ -212,7 +212,7 @@
 
     let assessment = `A- A ${document.getElementById("age").value} year old PT was ${document.getElementById("found").value.toLowerCase()}. The PT was ${document.getElementById("AAO").value} ${(document.getElementById("airwayPatent").checked ? 'with a patent airway':'')}. Vitals were obtained. ${document.getElementById("additionalAssessment").value}.`
 
-    let rx = document.getElementById("rxText").value
+    let rx = 'R- '+document.getElementById("rxText").value
 
     let transport = `T- ${document.getElementById("transport").value}`
 
