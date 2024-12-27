@@ -164,7 +164,7 @@
       <option>Radio</option>
       <option>Phone</option>
     </select>
-    <input id="moveHospital" type="text" onchange="transportPreview()" placeholder="On arrival, where was the patient left (ED room bed, triage, hall bed)?">
+    <textarea id="moveHospital" type="text" onchange="transportPreview()" placeholder="On arrival, where was the patient left (ED room bed, triage, hall bed)?"></textarea>
     <fieldset>
       <legend>Preview</legend>
       <p id="transportPreview"></p>
@@ -174,7 +174,7 @@
   <!--Exceptions-->
   <div class="input-card">
     <h1>Exceptions</h1>
-    <textarea id="exceptions" cols="80" rows="3">None</textarea>
+    <textarea onchange="exceptionsPreview()" id="exceptions" cols="80" rows="3">None</textarea>
     <fieldset>
       <legend>Preview</legend>
       <p id="exceptionsPreview"></p>
@@ -186,7 +186,7 @@
     <h1>Narrative Template</h1>
     <input type="checkbox" id="agreement" style="display:inline" onclick="enableBtn()"><span> I confirm that I have reviewed the generated EMS PCR template and made any necessary edits to ensure the accuracy, completeness, and grammatical correctness of the report. I acknowledge that it is my responsibility to ensure all information is truthful, detailed, and documented to the best of my ability, and that the report aligns with applicable protocols and standards of care.</span><br>
     <button id="templateBtn" onclick="generateTemplate()" disabled>Generate Template</button>
-    <textarea style="margin-top: 10px;" id="template" cols="100" rows="50"></textarea>
+    <textarea style="margin-top: 10px;" id="template" cols="100" rows="30"></textarea>
   </div>
   
 </body>
