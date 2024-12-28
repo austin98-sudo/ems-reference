@@ -10,6 +10,10 @@
       font-family: Arial, Helvetica, sans-serif;
     }
 
+    body {
+      overflow: scroll;
+    }
+
     div.inline-input {
         display: flex;
         align-items: center;
@@ -126,7 +130,7 @@
       <option>AAO x 2</option>
       <option>AAO x 1</option>
     </select>
-    <input onchange="assessmentPreview()" type="text" id="" value="Airway is patent. Breathing is at an appropriate rate and depth to sustain life. Pulse is present.">
+    <input onchange="assessmentPreview()" type="text" id="abcs" value="Airway is patent. Breathing is at an appropriate rate and depth to sustain life. Pulse is present.">
     <textarea id="additionalAssessment" onchange="assessmentPreview()" cols="80" rows="3" placeholder="Additional assessment"></textarea>
     <fieldset>
         <legend>Preview</legend>
@@ -137,8 +141,8 @@
   <!--RX-->
   <div class="input-card">
     <h1>RX</h1>
-    <input type="text" onchange="rxPreview()" id="sceneRx" placeholder="Scene vitals, procedures, and medications">
-    <input type="text" onchange="rxPreview()" id="transportRx" placeholder="Transport vitals, procedures, and medications">
+    <textarea cols="100" rows="3" type="text" onchange="rxPreview()" id="sceneRx" placeholder="Scene vitals, procedures, and medications"></textarea>
+    <textarea cols="100" rows="3" type="text" onchange="rxPreview()" id="transportRx" placeholder="Transport vitals, procedures, and medications"></textarea>
     <fieldset>
       <legend>Preview</legend>
       <p id="rxPreview"></p>
@@ -186,7 +190,7 @@
     <h1>Narrative Template</h1>
     <input type="checkbox" id="agreement" style="display:inline" onclick="enableBtn()"><span> I confirm that I have reviewed the generated EMS PCR template and made any necessary edits to ensure the accuracy, completeness, and grammatical correctness of the report. I acknowledge that it is my responsibility to ensure all information is truthful, detailed, and documented to the best of my ability, and that the report aligns with applicable protocols and standards of care.</span><br>
     <button id="templateBtn" onclick="generateTemplate()" disabled>Generate Template</button>
-    <textarea style="margin-top: 10px;" id="template" cols="100" rows="30"></textarea>
+    <textarea style="margin-top: 10px;" id="template" cols="100" rows="23"></textarea>
   </div>
   
 </body>
@@ -225,7 +229,7 @@ alert("Disclaimer: \n\nThis EMS PCR template generator is provided as a general 
     }
 
     function assessmentPreview() {
-      document.getElementById("assessmentPreview").innerText = `Pt is a ${document.getElementById("age").value} year old ${document.getElementById("gender").value.toLowerCase()} who is ${document.getElementById("AAO").value}. ${document.getElementById("found").value}. ${document.getElementById("additionalAssessment").value}`
+      document.getElementById("assessmentPreview").innerText = `Pt is a ${document.getElementById("age").value} year old ${document.getElementById("gender").value.toLowerCase()} who is ${document.getElementById("AAO").value}. ${document.getElementById("found").value}. ${document.getElementById("abcs").value}.\n\n${document.getElementById("additionalAssessment").value}`
     }
 
     function rxPreview() {
