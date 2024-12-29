@@ -6,89 +6,155 @@
   <title>Narrative Template Generator</title>
 </head>
 <style>
-   * {
-      font-family: Arial, Helvetica, sans-serif;
-    }
 
-    body {
-      overflow: scroll;
-    }
+  :root {
+      --primary: #2c3e50;
+      --secondary: #34495e;
+      --accent: #3498db;
+      --light: #ecf0f1;
+      --gray: #95a5a6;
+  }
 
-    div.inline-input {
-        display: flex;
-        align-items: center;
-        margin-top: 5px;
-        margin-bottom: 5px;
-    }
+  * {
+      font-family: 'Inter', Arial, sans-serif;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+  }
 
-    div.inline-input *:not(:first-child){
-        margin-left: 5px;
-    }
+  body {
+      background-color: var(--light);
+      color: var(--primary);
+      margin: 0;
+      padding: 20px;
+      overflow-x: hidden;
+      overflow-y: scroll;
+      line-height: 1.6;
+  }
 
-    label {
-      display: block;
-      margin-bottom: 10px;
-    }
+  .container {
+      max-width: 1000px;
+      margin: 15px auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 
-    fieldset {
-        margin-top: 10px;
-    }
-
-    input[type="text"] {
-      width: 50%;
-    }
-
-    input,select,textarea {
-        font-size: 12pt;
-        display: block;
-        margin-bottom: 5px;
-    }
-
-    h1 {
+  h1 {
+      color: var(--primary);
       margin-top: 0;
-      margin-bottom: 0.5em;
-    }
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+  }
 
-    .input-card {
-      background-color: #d6d3d1;
-      padding: 0.5em 1em;
-      border-radius: 5px;
-      margin-bottom: 0.5em;
-    }
+  .inline-input {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+  }
 
-    button {
-      margin-top: 10px;
-      margin-right: 5px;
-      padding: 1em 2em;
-      border-radius: 5px;
-      border: 1px solid transparent;
-      box-shadow: 1px 1px 2px gray;
-    }
+  label {
+      font-weight: 500;
+      color: var(--secondary);
+      margin-bottom: 0.5rem;
+  }
+
+  input, select, textarea {
+      width: 100%;
+      padding: 0.8rem;
+      border: 2px solid var(--gray);
+      border-radius: 8px;
+      font-size: 1rem;
+      background: white;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+  }
+
+  fieldset {
+      border: 2px solid var(--gray);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      background: rgba(236, 240, 241, 0.3);
+  }
+
+  legend {
+      padding: 0 1rem;
+      font-weight: 600;
+      color: var(--secondary);
+  }
+
+  button {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
+  }
+
+  button:active {
+      transform: translateY(0);
+  }
+
+  @keyframes fadeIn {
+      from {
+          opacity: 0;
+          transform: translateY(10px);
+      }
+      to {
+          opacity: 1;
+          transform: translateY(0);
+      }
+  }
+
+  .container > * {
+      animation: fadeIn 0.5s ease forwards;
+  }
+
+  textarea {
+      resize: vertical;
+  }
 </style>
 <body>
 
   <!--Dispatch-->
-  <div class="input-card">
+  <div class="container">
     <h1>Dispatch</h1>
+    <div class="inline-input">
     <select onchange="dispatchPreview()" id="station">
         <option>Wintergreen station 1</option>
         <option>Wintergreen station 2</option>
         <option>Nelson EMS</option>
     </select>
     <input onchange="dispatchPreview()" type="text" placeholder="EMD Complaint" id="emdcomplaint">
-    <div class="inline-input">
         <select onchange="dispatchPreview()" id="level">
             <option>Medic</option>
             <option>Trauma</option>
             <option>Rescue</option>
         </select>
         <input onchange="dispatchPreview()" type="text" id="unit" placeholder="Unit number">
-    </div>
-    <select onchange="dispatchPreview()" id="responseMethod">
-        <option>Lights and sirens</option>
-        <option>Lights and no sirens</option>
-        <option>No lights and no sirens</option>
-    </select>
+        <select onchange="dispatchPreview()" id="responseMethod">
+          <option>Lights and sirens</option>
+          <option>Lights and no sirens</option>
+          <option>No lights and no sirens</option>
+        </select>
+      </div>
     <fieldset>
         <legend>Preview</legend>
         <p id="dispatchPreview"></p>
@@ -96,7 +162,7 @@
   </div>
   
   <!--Complaint-->
-  <div class="input-card">
+  <div class="container">
     <h1>Complaint</h1>
     <textarea onchange="complaintPreview()" type="text" id="complaint" cols="80" rows="3" placeholder="Usually one sentence, in the patient’s own words, put inside quotes. If patient cannot tell you, you can describe why he/she needs assistance."></textarea>
     <fieldset>
@@ -106,7 +172,7 @@
   </div>
 
   <!--History-->
-  <div class="input-card">
+  <div class="container">
     <h1>History</h1>
     <textarea onchange="historyPreview()" type="text" id="history" cols="80" rows="3" placeholder="History of both this specific medical problem or traumatic event. Include SAMPLE and OPQRST history."></textarea>
     <fieldset>
@@ -116,22 +182,44 @@
   </div>
 
   <!--Assessment-->
-  <div class="input-card">
+  <div class="container">
     <h1>Assessment</h1>
+    <div class="inline-input">
     <input onchange="assessmentPreview()" type="text" id="found" placeholder="Where you found the patient">
     <input onchange="assessmentPreview()" type="number" id="age" placeholder="Patient age">
-    <select id="gender">
+    <select onchange="assessmentPreview()" id="gender">
       <option>Male</option>
       <option>Female</option>
     </select>
-    <select onchange="assessmentPreview()" id="AAO">
-      <option>AAO x 4</option>
-      <option>AAO x 3</option>
-      <option>AAO x 2</option>
-      <option>AAO x 1</option>
-    </select>
+    <div id="aaoCheckboxes" onchange="assessmentPreview()" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+      <label style="display: flex; align-items: center; margin-right: 1rem;"><input style=" width: auto!important;" type="checkbox" value="person">Person</label>
+      <label style="display: flex; align-items: center; margin-right: 1rem;"><input style=" width: auto!important;" type="checkbox" value="place">Place</label>
+      <label style="display: flex; align-items: center; margin-right: 1rem;"><input style=" width: auto!important;" type="checkbox" value="time">Time</label>
+      <label style="display: flex; align-items: center; margin-right: 1rem;"><input style=" width: auto!important;" type="checkbox" value="event">Event</label>
+    </div>
+    <input type="hidden" id="AAO" value="AAO x 0">
+    <script>
+      function countCheckedCheckboxes() {
+        const checkboxes = document.querySelectorAll('#aaoCheckboxes input[type="checkbox"]');
+        let count = 0;
+        checkboxes.forEach(checkbox => {
+          if (checkbox.checked) {
+            count++;
+          }
+        });
+        document.getElementById('AAO').value = `AAO x ${count}`;
+        assessmentPreview();
+      }
+
+      document.querySelectorAll('#aaoCheckboxes input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', countCheckedCheckboxes);
+      });
+
+      countCheckedCheckboxes(); // Initial count
+    </script>
     <input onchange="assessmentPreview()" type="text" id="abcs" value="Airway is patent. Breathing is at an appropriate rate and depth to sustain life. Pulse is present.">
     <textarea id="additionalAssessment" onchange="assessmentPreview()" cols="80" rows="3" placeholder="Additional assessment"></textarea>
+  </div>
     <fieldset>
         <legend>Preview</legend>
         <p id="assessmentPreview"></p>
@@ -139,7 +227,7 @@
   </div>
 
   <!--RX-->
-  <div class="input-card">
+  <div class="container">
     <h1>RX</h1>
     <textarea cols="100" rows="3" type="text" onchange="rxPreview()" id="sceneRx" placeholder="Scene vitals, procedures, and medications"></textarea>
     <textarea cols="100" rows="3" type="text" onchange="rxPreview()" id="transportRx" placeholder="Transport vitals, procedures, and medications"></textarea>
@@ -150,25 +238,27 @@
   </div>
 
   <!--Transport-->
-  <div class="input-card">
+  <div class="container">
     <h1>Transport</h1>
+    <div class="inline-input">
     <input id="consent" type="text" onchange="transportPreview()" placeholder="Did the patient want to be taken to a facility for further assessment and treatment?">
     <input id="move" type="text" onchange="transportPreview()" placeholder="How did the patient get from where you found them to the ambulance?" value="PT was moved to ambulance via stretcher and secured via 3 saftey belts.">
-    <select id="hospital">
+    <select onchange="transportPreview()" id="hospital">
       <option>UVA</option>
       <option>Augusta Health</option>
       <option>Lynchburg General</option>
       <option>Martha Jefferson</option>
     </select>
-    <select id="transportMode">
+    <select onchange="transportPreview()" id="transportMode">
       <option>Emergent</option>
       <option>Non-emergent</option>
     </select>
-    <select id="contact">
+    <select onchange="transportPreview()" id="contact">
       <option>Radio</option>
       <option>Phone</option>
     </select>
     <textarea cols="100" rows="3" id="moveHospital" type="text" onchange="transportPreview()" placeholder="On arrival, where was the patient left (ED room bed, triage, hall bed)?"></textarea>
+  </div>
     <fieldset>
       <legend>Preview</legend>
       <p id="transportPreview"></p>
@@ -176,7 +266,7 @@
   </div>
 
   <!--Exceptions-->
-  <div class="input-card">
+  <div class="container">
     <h1>Exceptions</h1>
     <textarea onchange="exceptionsPreview()" id="exceptions" cols="80" rows="3">None</textarea>
     <fieldset>
@@ -186,9 +276,9 @@
   </div>
 
   <!--Template-->
-  <div class="input-card">
+  <div class="container">
     <h1>Narrative Template</h1>
-    <input type="checkbox" id="agreement" style="display:inline" onclick="enableBtn()"><span> I confirm that I have reviewed the generated EMS PCR template and made any necessary edits to ensure the accuracy, completeness, and grammatical correctness of the report. I acknowledge that it is my responsibility to ensure all information is truthful, detailed, and documented to the best of my ability, and that the report aligns with applicable protocols and standards of care.</span><br>
+    <input type="checkbox" id="agreement" style="display:inline; width: auto" onclick="enableBtn()"><span> I confirm that I have reviewed the generated EMS PCR template and made any necessary edits to ensure the accuracy, completeness, and grammatical correctness of the report. I acknowledge that it is my responsibility to ensure all information is truthful, detailed, and documented to the best of my ability, and that the report aligns with applicable protocols and standards of care.</span><br>
     <button id="templateBtn" onclick="generateTemplate()" disabled>Generate Template</button>
     <textarea style="margin-top: 10px;" id="template" cols="100" rows="23"></textarea>
   </div>
