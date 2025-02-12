@@ -147,6 +147,7 @@
             <option>Medic</option>
             <option>Trauma</option>
             <option>Rescue</option>
+            <option>Response</option>
         </select>
         <input onchange="dispatchPreview()" type="text" id="unit" placeholder="Unit number">
         <select onchange="dispatchPreview()" id="responseMethod">
@@ -242,7 +243,7 @@
     <h1>Transport</h1>
     <div class="inline-input">
     <input id="consent" type="text" onchange="transportPreview()" placeholder="Did the patient want to be taken to a facility for further assessment and treatment?">
-    <input id="move" type="text" onchange="transportPreview()" placeholder="How did the patient get from where you found them to the ambulance?" value="PT was moved to ambulance via stretcher and secured via 3 saftey belts.">
+    <input id="move" type="text" onchange="transportPreview()" placeholder="How did the patient get from where you found them to the ambulance?" value="PT was moved to ambulance via stretcher and secured via 3 safety belts.">
     <select onchange="transportPreview()" id="hospital">
       <option>UVA</option>
       <option>Augusta Health</option>
@@ -327,7 +328,7 @@ alert("Disclaimer: \n\nThis EMS PCR template generator is provided as a general 
     }
 
     function transportPreview() {
-      document.getElementById("transportPreview").innerText = `${document.getElementById("consent").value}. ${document.getElementById("move").value} Pt was transported to ${document.getElementById("hospital").value}, ${document.getElementById("transportMode").value.toLowerCase()} and was contacted via ${document.getElementById("contact").value.toLowerCase()}. ${document.getElementById("moveHospital").value}`
+      document.getElementById("transportPreview").innerText = `${document.getElementById("consent").value}. ${document.getElementById("move").value} Pt was transported to ${document.getElementById("hospital").value}, ${document.getElementById("transportMode").value.toLowerCase()}. Medcom was contacted by ${document.getElementById("contact").value.toLowerCase()}. ${document.getElementById("moveHospital").value}`
     }
 
     function exceptionsPreview() {
