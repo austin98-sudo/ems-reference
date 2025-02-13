@@ -218,8 +218,16 @@
 
       countCheckedCheckboxes(); // Initial count
     </script>
-    <input onchange="assessmentPreview()" type="text" id="abcs" value="Airway is patent. Breathing is at an appropriate rate and depth to sustain life. Pulse is present.">
-    <textarea id="additionalAssessment" onchange="assessmentPreview()" cols="80" rows="3" placeholder="Additional assessment"></textarea>
+    <input onchange="assessmentPreview()" type="text" id="abcs" value="Patient breathes with adequate rate and quality to sustain life. Breath sounds clear and equal bilaterally in all lobes upon auscultation.">
+    <textarea id="additionalAssessment" onchange="assessmentPreview()" cols="80" rows="10" placeholder="Additional assessment">
+NEURO:
+SKIN:
+HEENT:
+CV:
+PULM:
+GI/GU/ABD:
+MS/Ortho:
+SOC/PSYCH:</textarea>
   </div>
     <fieldset>
         <legend>Preview</legend>
@@ -230,8 +238,8 @@
   <!--RX-->
   <div class="container">
     <h1>RX</h1>
-    <textarea cols="100" rows="3" type="text" onchange="rxPreview()" id="sceneRx" placeholder="Scene vitals, procedures, and medications"></textarea>
-    <textarea cols="100" rows="3" type="text" onchange="rxPreview()" id="transportRx" placeholder="Transport vitals, procedures, and medications"></textarea>
+    <textarea cols="100" rows="3" type="text" onchange="rxPreview()" id="sceneRx" placeholder="Scene vitals, procedures, and medications.">Patient assessed, initial set of vitals obtained and documented</textarea>
+    <textarea cols="100" rows="3" type="text" onchange="rxPreview()" id="transportRx" placeholder="Transport vitals, procedures, and medications.">Repeat vitals obtained and documented. Patient monitored throughout transport</textarea>
     <fieldset>
       <legend>Preview</legend>
       <p id="rxPreview"></p>
@@ -243,7 +251,7 @@
     <h1>Transport</h1>
     <div class="inline-input">
     <input id="consent" type="text" onchange="transportPreview()" placeholder="Did the patient want to be taken to a facility for further assessment and treatment?">
-    <input id="move" type="text" onchange="transportPreview()" placeholder="How did the patient get from where you found them to the ambulance?" value="PT was moved to ambulance via stretcher and secured via 3 safety belts.">
+    <input id="move" type="text" onchange="transportPreview()" placeholder="How did the patient get from where you found them to the ambulance?" value="Patient was lifted to stretcher by EMS, secured to stretcher via appropriate safety restraints, stretcher secured via floor mount in transporting unit.">
     <select onchange="transportPreview()" id="hospital">
       <option>UVA</option>
       <option>Augusta Health</option>
@@ -308,7 +316,7 @@ alert("Disclaimer: \n\nThis EMS PCR template generator is provided as a general 
     }
 
     function dispatchPreview() {
-        document.getElementById("dispatchPreview").innerText = `${document.getElementById("station").value} was dispatched for ${document.getElementById("emdcomplaint").value.toLowerCase()}. ${document.getElementById("level").value} ${document.getElementById("unit").value} responded with ${document.getElementById("responseMethod").value.toLowerCase()}`
+        document.getElementById("dispatchPreview").innerText = `${document.getElementById("station").value} was dispatched to ${document.getElementById("emdcomplaint").value.toLowerCase()} ${document.getElementById("level").value} ${document.getElementById("unit").value} responded with ${document.getElementById("responseMethod").value.toLowerCase()}.`
     }
 
     function complaintPreview() {
@@ -320,15 +328,15 @@ alert("Disclaimer: \n\nThis EMS PCR template generator is provided as a general 
     }
 
     function assessmentPreview() {
-      document.getElementById("assessmentPreview").innerText = `Pt is a ${document.getElementById("age").value} year old ${document.getElementById("gender").value.toLowerCase()} who is ${document.getElementById("AAO").value}. ${document.getElementById("found").value}. ${document.getElementById("abcs").value}.\n\n${document.getElementById("additionalAssessment").value}`
+      document.getElementById("assessmentPreview").innerText = `Pt is a ${document.getElementById("age").value} year old ${document.getElementById("gender").value.toLowerCase()} who is ${document.getElementById("AAO").value}. ${document.getElementById("found").value} ${document.getElementById("abcs").value}\n\n${document.getElementById("additionalAssessment").value}`
     }
 
     function rxPreview() {
-      document.getElementById("rxPreview").innerText = `(Scene) ${document.getElementById("sceneRx").value}. (Transport) ${document.getElementById("transportRx").value}.`
+      document.getElementById("rxPreview").innerText = `(Scene) ${document.getElementById("sceneRx").value} (Transport) ${document.getElementById("transportRx").value}`
     }
 
     function transportPreview() {
-      document.getElementById("transportPreview").innerText = `${document.getElementById("consent").value}. ${document.getElementById("move").value} Pt was transported to ${document.getElementById("hospital").value}, ${document.getElementById("transportMode").value.toLowerCase()}. Medcom was contacted by ${document.getElementById("contact").value.toLowerCase()}. ${document.getElementById("moveHospital").value}`
+      document.getElementById("transportPreview").innerText = `${document.getElementById("consent").value} ${document.getElementById("move").value} Pre-arrival report made to ${document.getElementById("hospital").value} ED via ${document.getElementById("contact").value.toLowerCase()} prior to EMS arrival. ${document.getElementById("moveHospital").value}`
     }
 
     function exceptionsPreview() {
