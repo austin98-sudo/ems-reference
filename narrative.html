@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Narrative Creator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f7fa;
+      color: #333;
+    }
+    header {
+      background: #4a90e2;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 1.5em;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .container {
+      display: flex;
+      padding: 20px;
+      gap: 20px;
+    }
+    .narrative-container {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+    }
+    .phrases-container {
+      flex: 1;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    textarea {
+      width: auto;
+      height: 550px;
+      padding: 15px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      resize: vertical;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+      margin-top: 10px;
+      background: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #407ac1;
+    }
+    .phrase {
+      background: #e9eff6;
+      border: 1px solid #cfdbe3;
+      padding: 10px;
+      margin-bottom: 10px;
+      text-align: center;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .phrase:hover {
+      background: #d8e2ed;
+    }
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .modal h3 {
+      margin-top: 0;
+    }
+    .modal select,
+    .modal input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1em;
+    }
+    .modal button {
+      width: 48%;
+    }
+    .modal-buttons {
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+  <script src="./phrases.js"></script>
+</head>
+<body>
+  <header>Narrative Creator</header>
+  <div class="container">
+    <div class="narrative-container">
+      <textarea id="narrative" placeholder="Type your narrative here...">D- {Dispatch Info}</textarea>
+      <button id="process">Process Narrative</button>
+    </div>
+    <div class="phrases-container">
+      <h2>Custom Phrases</h2>
+      <div id="customPhrases">
+        <!-- Custom phrase buttons will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for prompts -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h3 id="modalTitle"></h3>
+      <div id="modalContent"></div>
+      <div class="modal-buttons">
+        <button id="modalConfirm">Confirm</button>
+        <button id="modalCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // JSON object with predefined phrases.
+    // Optional defaults can be provided at the token level or per field.
+
+    // Inserts text at the current cursor position within a textarea.
+    function insertAtCursor(field, value) {
+      if (document.selection) {
+        field.focus();
+        const sel = document.selection.createRange();
+        sel.text = value;
+      } else if (field.selectionStart || field.selectionStart === 0) {
+        const startPos = field.selectionStart;
+        const endPos = field.selectionEnd;
+        field.value = field.value.substring(0, startPos) + value + field.value.substring(endPos);
+        field.selectionStart = startPos + value.length;
+        field.selectionEnd = startPos + value.length;
+      } else {
+        field.value += value;
+      }
+      field.focus();
+    }
+
+    // Generate the custom phrase buttons.
+    function generatePhraseButtons() {
+      const container = document.getElementById("customPhrases");
+      container.innerHTML = "";
+      for (const phrase in predefinedPhrases) {
+        const div = document.createElement("div");
+        div.className = "phrase";
+        div.textContent = `{${phrase}}`;
+        // When clicking a phrase, open the prompt for that phrase.
+        div.addEventListener("click", () => {
+          openPhrasePrompt(phrase);
+        });
+        container.appendChild(div);
+      }
+    }
+
+    // Ensure the DOM is loaded before generating buttons.
+    document.addEventListener("DOMContentLoaded", generatePhraseButtons);
+
+    // Modal handling
+    const modalOverlay = document.getElementById("modalOverlay");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalContent = document.getElementById("modalContent");
+    const modalConfirm = document.getElementById("modalConfirm");
+    const modalCancel = document.getElementById("modalCancel");
+
+    function showModal(title, contentElement, confirmCallback) {
+      modalTitle.textContent = title;
+      modalContent.innerHTML = "";
+      modalContent.appendChild(contentElement);
+      modalOverlay.style.display = "flex";
+
+      modalConfirm.onclick = function() {
+        confirmCallback();
+        closeModal();
+      };
+
+      modalCancel.onclick = function() {
+        closeModal();
+      };
+    }
+
+    function closeModal() {
+      modalOverlay.style.display = "none";
+    }
+
+    // Sequentially ask each field for composite tokens, one at a time.
+    // As you answer, update the preview within the modal.
+    function askSequentialField(key, phraseData, index, answers, finalCallback) {
+      if (index >= phraseData.fields.length) {
+        finalCallback(answers);
+        return;
+      }
+      const field = phraseData.fields[index];
+      const container = document.createElement("div");
+      container.style.marginBottom = "10px";
+
+      const label = document.createElement("label");
+      label.textContent = field.label;
+      label.style.display = "block";
+      label.style.marginBottom = "5px";
+      container.appendChild(label);
+
+      let input;
+      if (field.type === "select") {
+        input = document.createElement("select");
+        if (field.multiple) input.multiple = true;
+        field.options.forEach(option => {
+          const opt = document.createElement("option");
+          opt.value = option;
+          opt.textContent = option;
+          input.appendChild(opt);
+        });
+        if (field.default) {
+          input.value = field.default;
+        }
+      } else {
+        input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = field.placeholder || "";
+        if (field.default) {
+          input.value = field.default;
+        }
+      }
+      input.style.width = "100%";
+      input.style.padding = "8px";
+      input.style.boxSizing = "border-box";
+      container.appendChild(input);
+
+      // Create a live preview area within the modal.
+      const previewDiv = document.createElement("div");
+      previewDiv.style.marginTop = "10px";
+      previewDiv.style.padding = "10px";
+      previewDiv.style.border = "1px solid #ccc";
+      previewDiv.style.borderRadius = "4px";
+      previewDiv.style.backgroundColor = "#f9f9f9";
+      container.appendChild(previewDiv);
+
+      function updatePreview() {
+        const totalFields = phraseData.fields.length;
+        const allAnswers = [];
+        for (let i = 0; i < totalFields; i++) {
+          if (i < index) {
+            allAnswers.push(answers[i]);
+          } else if (i === index) {
+            if (input.tagName.toLowerCase() === "select" && input.multiple) {
+              allAnswers.push(Array.from(input.selectedOptions).map(opt => opt.value).join(", "));
+            } else {
+              allAnswers.push(input.value);
+            }
+          } else {
+            // For remaining fields, use default if provided, else an empty string.
+            allAnswers.push(phraseData.fields[i].default || "");
+          }
+        }
+        let previewText = "";
+        if (typeof phraseData.previewTemplate === "function") {
+          previewText = phraseData.previewTemplate(allAnswers);
+        } else {
+          previewText = allAnswers.join(" ");
+        }
+        previewDiv.textContent = "Preview: " + previewText;
+      }
+
+      input.addEventListener("input", updatePreview);
+      input.addEventListener("change", updatePreview);
+      updatePreview();
+
+      showModal(`Enter ${field.label}`, container, () => {
+        let answer;
+        if (input.tagName.toLowerCase() === "select" && input.multiple) {
+          answer = Array.from(input.selectedOptions).map(opt => opt.value).join(", ");
+        } else {
+          answer = input.value;
+        }
+        answers.push(answer);
+        // Use a short delay to allow modal closing before asking the next question.
+        setTimeout(() => {
+          askSequentialField(key, phraseData, index + 1, answers, finalCallback);
+        }, 100);
+      });
+    }
+
+    // Open the prompt for a given phrase and insert the result at the cursor.
+    function openPhrasePrompt(key) {
+      const narrativeField = document.getElementById("narrative");
+      const phraseData = predefinedPhrases[key];
+      if (!phraseData) {
+        // Fallback if not defined.
+        const value = prompt("Enter value for " + key + ":");
+        if (value !== null) {
+          insertAtCursor(narrativeField, value);
+        }
+        return;
+      }
+      // If composite token with multiple fields, ask questions sequentially.
+      if (phraseData.fields) {
+        askSequentialField(key, phraseData, 0, [], (answers) => {
+          let finalValue = "";
+          if (typeof phraseData.previewTemplate === "function") {
+            finalValue = phraseData.previewTemplate(answers);
+          } else {
+            finalValue = answers.join(" ");
+          }
+          insertAtCursor(narrativeField, finalValue);
+        });
+      }
+      // For simple select tokens.
+      else if (phraseData.type === "select") {
+        const inputElement = document.createElement("select");
+        if (phraseData.multiple) inputElement.multiple = true;
+        phraseData.options.forEach(option => {
+          const opt = document.createElement("option");
+          opt.value = option;
+          opt.textContent = option;
+          inputElement.appendChild(opt);
+        });
+        if (phraseData.default) {
+          if (phraseData.multiple && Array.isArray(phraseData.default)) {
+            Array.from(inputElement.options).forEach(opt => {
+              if (phraseData.default.includes(opt.value)) {
+                opt.selected = true;
+              }
+            });
+          } else {
+            inputElement.value = phraseData.default;
+          }
+        }
+        showModal(`Enter value for ${key}`, inputElement, () => {
+          let selectedValue;
+          if (phraseData.multiple) {
+            const selectedOptions = Array.from(inputElement.selectedOptions).map(opt => opt.value);
+            selectedValue = selectedOptions.join(", ");
+          } else {
+            selectedValue = inputElement.value;
+          }
+          insertAtCursor(narrativeField, selectedValue);
+        });
+      }
+      // For simple input tokens.
+      else {
+        const inputElement = document.createElement("input");
+        inputElement.type = "text";
+        inputElement.placeholder = phraseData.placeholder || "";
+        if (phraseData.default) {
+          inputElement.value = phraseData.default;
+        }
+        showModal(`Enter value for ${key}`, inputElement, () => {
+          const value = inputElement.value;
+          insertAtCursor(narrativeField, value);
+        });
+      }
+    }
+
+    // (Optional) Existing process narrative function for tokens in text.
+    const tokenRegex = /{([^}]+)}/g;
+    let tokensFound = [];
+    let currentTokenIndex = 0;
+    document.getElementById("process").addEventListener("click", () => {
+      const narrativeField = document.getElementById("narrative");
+      const narrativeText = narrativeField.value;
+      tokensFound = [...narrativeText.matchAll(tokenRegex)];
+      currentTokenIndex = 0;
+      processNextToken(narrativeField);
+    });
+    function processNextToken(narrativeField) {
+      if (currentTokenIndex >= tokensFound.length) return;
+      const tokenMatch = tokensFound[currentTokenIndex];
+      const fullMatch = tokenMatch[0];
+      const key = tokenMatch[1].trim();
+      const phraseData = predefinedPhrases[key];
+      if (phraseData) {
+        if (phraseData.fields) {
+          askSequentialField(key, phraseData, 0, [], (answers) => {
+            let finalValue = "";
+            if (typeof phraseData.previewTemplate === "function") {
+              finalValue = phraseData.previewTemplate(answers);
+            } else {
+              finalValue = answers.join(" ");
+            }
+            const updatedText = narrativeField.value.replace(fullMatch, finalValue);
+            narrativeField.value = updatedText;
+            currentTokenIndex++;
+            processNextToken(narrativeField);
+          });
+        } else if (phraseData.type === "select") {
+          const inputElement = document.createElement("select");
+          if (phraseData.multiple) inputElement.multiple = true;
+          phraseData.options.forEach(option => {
+            const opt = document.createElement("option");
+            opt.value = option;
+            opt.textContent = option;
+            inputElement.appendChild(opt);
+          });
+          if (phraseData.default) {
+            if (phraseData.multiple && Array.isArray(phraseData.default)) {
+              Array.from(inputElement.options).forEach(opt => {
+                if (phraseData.default.includes(opt.value)) {
+                  opt.selected = true;
+                }
+              });
+            } else {
+              inputElement.value = phraseData.default;
+            }
+          }
+          showModal(`Enter value for ${key}`, inputElement, () => {
+            let selectedValue;
+            if (phraseData.multiple) {
+              const selectedOptions = Array.from(inputElement.selectedOptions).map(opt => opt.value);
+              selectedValue = selectedOptions.join(", ");
+            } else {
+              selectedValue = inputElement.value;
+            }
+            const updatedText = narrativeField.value.replace(fullMatch, selectedValue);
+            narrativeField.value = updatedText;
+            currentTokenIndex++;
+            processNextToken(narrativeField);
+          });
+        } else {
+          const inputElement = document.createElement("input");
+          inputElement.type = "text";
+          inputElement.placeholder = phraseData.placeholder || "";
+          if (phraseData.default) inputElement.value = phraseData.default;
+          showModal(`Enter value for ${key}`, inputElement, () => {
+            const value = inputElement.value;
+            const updatedText = narrativeField.value.replace(fullMatch, value);
+            narrativeField.value = updatedText;
+            currentTokenIndex++;
+            processNextToken(narrativeField);
+          });
+        }
+      } else {
+        const userInput = prompt(`Enter value for ${key}:`);
+        const updatedText = narrativeField.value.replace(fullMatch, userInput || "");
+        narrativeField.value = updatedText;
+        currentTokenIndex++;
+        processNextToken(narrativeField);
+      }
+    }
+  </script>
+</body>
+</html>
