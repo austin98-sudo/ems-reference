@@ -166,8 +166,8 @@ const predefinedPhrases = {
       }
     ],
     "template": "GCS is {0}. {1}",
-    "section": "Default",
-    "visible": true,
+    "section": "Pre-Generated",
+    "visible": false,
     "order": 6000,
     "name": "neuro"
   },
@@ -193,8 +193,8 @@ const predefinedPhrases = {
       }
     ],
     "template": "{0}. Pupils are {1}",
-    "section": "Default",
-    "visible": true,
+    "section": "Pre-Generated",
+    "visible": false,
     "order": 7000,
     "name": "heent"
   },
@@ -214,8 +214,8 @@ const predefinedPhrases = {
       }
     ],
     "template": "{0}. {1}",
-    "section": "Default",
-    "visible": true,
+    "section": "Pre-Generated",
+    "visible": false,
     "order": 8000,
     "name": "cv"
   },
@@ -257,8 +257,8 @@ const predefinedPhrases = {
       }
     ],
     "template": "{0}. {1}. SPO2 was noted to be {2} on {3}",
-    "section": "Default",
-    "visible": true,
+    "section": "Pre-Generated",
+    "visible": false,
     "order": 9000,
     "name": "pulm"
   },
@@ -284,8 +284,8 @@ const predefinedPhrases = {
       }
     ],
     "template": "{0}. All four quadrants were palpated with {1}. Pt reports {2}",
-    "section": "Default",
-    "visible": true,
+    "section": "Pre-Generated",
+    "visible": false,
     "order": 10000,
     "name": "abd/gi/gu"
   },
@@ -305,8 +305,8 @@ const predefinedPhrases = {
       }
     ],
     "template": "{0}. {1}",
-    "section": "Default",
-    "visible": true,
+    "section": "Pre-Generated",
+    "visible": false,
     "order": 11000,
     "name": "ms/ortho/skin"
   },
@@ -338,8 +338,8 @@ const predefinedPhrases = {
       }
     ],
     "template": "Pt was moved to the stretcher via {0}. Once Pt was on the stretcher, the Pt was secured via seat belts x3 with shoulder straps and both rails raised. Pt was placed in a {1} position",
-    "section": "Default",
-    "visible": true,
+    "section": "Pre-Generated",
+    "visible": false,
     "order": 12000,
     "name": "move to stretcher"
   },
@@ -382,8 +382,8 @@ const predefinedPhrases = {
       }
     ],
     "template": "Pt was transported to {0}, {1}. During transport {0} was contacted and given a med report via {2}",
-    "section": "Default",
-    "visible": true,
+    "section": "Pre-Generated",
+    "visible": false,
     "order": 13000,
     "name": "transport"
   },
@@ -425,8 +425,8 @@ const predefinedPhrases = {
       }
     ],
     "template": "{0}. {1} via {2}",
-    "section": "Default",
-    "visible": true,
+    "section": "Pre-Generated",
+    "visible": false,
     "order": 14000,
     "name": "hospital transfer"
   },
@@ -475,9 +475,45 @@ const predefinedPhrases = {
       }
     ],
     "template": "A {0} IV was {2} in the {1}.",
-    "section": "Default",
+    "section": "Procedure",
     "visible": true,
     "order": 15000,
     "name": "iv insertion"
+  },
+  "synchronized cardioversion": {
+    "fields": [
+      {
+        "label": "Joules",
+        "type": "input",
+        "placeholder": "120J",
+        "default": ""
+      }
+    ],
+    "template": "Monitor was synchronized and Pt was cardioverted at {0}",
+    "section": "Procedure",
+    "visible": true,
+    "order": 1740625260759,
+    "name": "synchronized cardioversion"
+  },
+  "adenosine": {
+    "fields": [
+      {
+        "label": "First dose",
+        "type": "input",
+        "placeholder": "6mg",
+        "default": "Pt was administered adenosine with an initial dose of 6mg"
+      },
+      {
+        "label": "Second dose",
+        "type": "input",
+        "placeholder": "12mg",
+        "default": "Pt was monitored throughout procedure and 2 minutes after. After no change in rhythm a secondary dose of 12mg was administered. Pt was monitored after second dose."
+      }
+    ],
+    "template": "{0}. {1}.",
+    "section": "Medication",
+    "visible": true,
+    "order": 1740625534116,
+    "name": "adenosine"
   }
 };
