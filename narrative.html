@@ -2,9 +2,10 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Narrative Creator</title>
+  <title>Narrative &amp; Phrase Manager</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <style>
+    /* Basic resets and fonts */
     body {
       font-family: 'Roboto', sans-serif;
       margin: 0;
@@ -20,43 +21,66 @@
       font-size: 1.5em;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    .container {
+    /* Tab navigation styles */
+    #tabs {
       display: flex;
-      padding: 20px;
-      gap: 20px;
+      background: #fff;
+      border-bottom: 2px solid #ccc;
     }
-    .narrative-container {
-      flex: 2;
-      display: flex;
-      flex-direction: column;
+    #tabs button {
+      flex: 1;
+      padding: 15px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font-size: 1em;
+      cursor: pointer;
+      color: black;
+      margin-top: 0;
+    }
+    #tabs button.active {
+      border-bottom: 2px solid #4a90e2;
+      font-weight: bold;
+    }
+    /* Container styles */
+    .container,.container-grid {
+      display: none;
+      padding: 20px;
+    }
+    .container.active {
+      display: block;
+    }
+    .container-grid.active {
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      grid-column-gap: 10px;
+    }
+    .narrative-container, .phrases-container {
+      margin-bottom: 20px;
     }
     .phrases-container {
-      flex: 1;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      max-height: 80vh;
-      overflow-y: auto;
+      height: 550px;
+      overflow-y: scroll;
     }
     textarea {
-      width: auto;
+      width: 100%;
       height: 550px;
       padding: 15px;
       font-size: 1em;
       border: 1px solid #ccc;
       border-radius: 8px;
       resize: vertical;
+      box-sizing: border-box;
     }
     button {
       padding: 10px 20px;
       font-size: 1em;
-      margin-top: 10px;
       background: #4a90e2;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      margin-top: 10px;
     }
     button:hover {
       background: #407ac1;
@@ -74,7 +98,41 @@
     .phrase:hover {
       background: #d8e2ed;
     }
-    /* Modal styles */
+    /* List styles for phrase manager */
+    #phraseList {
+      margin-top: 20px;
+    }
+    .phrase-item {
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .phrase-item span {
+      font-weight: bold;
+    }
+    .phrase-actions button {
+      margin-left: 5px;
+      background: #4a90e2;
+    }
+    .phrase-actions button.delete {
+      background: #e74c3c;
+    }
+    /* Collapsible section styles */
+    .collapsible-header {
+      cursor: pointer;
+      background: #ddd;
+      padding: 8px;
+      border-radius: 4px;
+    }
+    .collapsible-content {
+      padding: 8px;
+      margin-top: 5px;
+    }
+    /* Modal styles (for prompting phrase input / export) */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -99,7 +157,8 @@
       margin-top: 0;
     }
     .modal select,
-    .modal input {
+    .modal input,
+    .modal textarea {
       width: 100%;
       padding: 8px;
       margin-top: 10px;
@@ -107,6 +166,7 @@
       border: 1px solid #ccc;
       border-radius: 4px;
       font-size: 1em;
+      box-sizing: border-box;
     }
     .modal button {
       width: 48%;
@@ -115,25 +175,84 @@
       display: flex;
       justify-content: space-between;
     }
+    /* New Phrase Form styles (in Phrase Manager tab) - in modal */
+    #phraseFormModal .modal {
+      width: 75%;
+    }
+    #phraseFormContainer {
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 4px;
+      background: #fff;
+    }
+    #phraseFormContainer h3 {
+      margin-top: 0;
+    }
+    #phraseFormContainer .field-row {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+    }
+    #phraseFormContainer .field-row > div {
+      margin-bottom: 5px;
+    }
+    #phraseFormContainer .remove-field {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      padding: 5px;
+    }
+    #phraseFormContainer .remove-field:hover {
+      background: #c0392b;
+    }
+    /* Scrollable composite fields container */
+    #compositeFieldsContainer {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 5px;
+      border-radius: 4px;
+    }
   </style>
   <script src="./phrases.js"></script>
 </head>
 <body>
-  <header>Narrative Creator</header>
-  <div class="container">
+  <!-- Tab Navigation -->
+  <div id="tabs">
+    <button id="narrativeTabBtn" class="active">Narrative</button>
+    <button id="phraseTabBtn">Phrases</button>
+  </div>
+
+  <!-- Narrative Tab -->
+  <div id="narrativeTab" class="container-grid active">
     <div class="narrative-container">
-      <textarea id="narrative" placeholder="Type your narrative here...">D- {Dispatch Info}</textarea>
-      <button id="process">Process Narrative</button>
+      <textarea id="narrative" placeholder="Type your narrative here..."></textarea>
+      <button style="width: 100%" id="process">Process Narrative</button>
     </div>
     <div class="phrases-container">
-      <h2>Custom Phrases</h2>
+      <h2 style="margin-top: 0">Custom Phrases</h2>
       <div id="customPhrases">
-        <!-- Custom phrase buttons will be injected here -->
+        <!-- Phrase buttons are injected here -->
       </div>
     </div>
   </div>
 
-  <!-- Modal for prompts -->
+  <!-- Phrase Manager Tab -->
+  <div id="phraseManagerTab" class="container">
+    <div style="width:100%;">
+      <h2>Phrase Manager</h2>
+      <button id="createPhraseBtn">Create New Phrase</button>
+      <button id="exportPhraseBtn">Export Phrases</button>
+      <div id="phraseList">
+        <!-- List of phrases with Edit/Delete/Up/Down actions will be shown here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Prompting Phrase Input / Export -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
       <h3 id="modalTitle"></h3>
@@ -145,11 +264,106 @@
     </div>
   </div>
 
-  <script>
-    // JSON object with predefined phrases.
-    // Optional defaults can be provided at the token level or per field.
+  <!-- Modal for Phrase Form (New/Edit) -->
+  <div class="modal-overlay" id="phraseFormModal" style="display:none;">
+    <div class="modal">
+      <div id="phraseFormContainer">
+        <h3 id="formTitle">Create New Phrase</h3>
+        <form id="phraseForm">
+          <div>
+            <label>Phrase Name:</label>
+            <input type="text" id="phraseName" required />
+          </div>
+          <div>
+            <label>Composite Phrase?</label>
+            <input type="checkbox" id="compositeCheckbox" />
+          </div>
+          <!-- New fields for grouping and toggling -->
+          <div>
+            <label>Section:</label>
+            <input type="text" id="phraseSection" placeholder="Optional section name" />
+          </div>
+          <div>
+            <label>Visible in Narrative Tab?</label>
+            <input type="checkbox" id="phraseVisible" checked />
+          </div>
+          <!-- Simple phrase fields -->
+          <div id="simplePhraseFields">
+            <div>
+              <label>Field Type:</label>
+              <select id="simpleFieldType">
+                <option value="input">Input</option>
+                <option value="select">Select</option>
+              </select>
+            </div>
+            <div>
+              <label>Placeholder:</label>
+              <input type="text" id="simplePlaceholder" />
+            </div>
+            <div>
+              <label>Default Value:</label>
+              <input type="text" id="simpleDefault" />
+            </div>
+            <div id="simpleOptionsContainer" style="display:none;">
+              <label>Options (comma separated):</label>
+              <input type="text" id="simpleOptions" />
+            </div>
+          </div>
+          <!-- Composite phrase fields -->
+          <div id="compositePhraseFields" style="display:none;">
+            <div id="compositeFieldsContainer">
+              <!-- Field rows will be added here -->
+            </div>
+            <button type="button" id="addFieldButton">Add Field</button>
+            <div style="margin-top:10px;">
+              <label>Insertion Template:</label>
+              <!-- Use placeholders {0}, {1}, etc. -->
+              <input type="text" id="insertionTemplate" placeholder="e.g., A {0} IV was established in the {1}." />
+            </div>
+          </div>
+          <div style="text-align: right; margin-top:10px;">
+            <button type="submit">Save Phrase</button>
+            <button type="button" id="cancelPhraseBtn">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
-    // Inserts text at the current cursor position within a textarea.
+  <!-- Modal for Exporting Phrases -->
+  <div class="modal-overlay" id="exportModal" style="display:none;">
+    <div class="modal" style="width: 75%;">
+      <h3>Export Phrases</h3>
+      <div id="exportContent"></div>
+      <div class="modal-buttons">
+        <button id="exportCloseBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+    /***** Tab Navigation Functions *****/
+    const narrativeTabBtn = document.getElementById("narrativeTabBtn");
+    const phraseTabBtn = document.getElementById("phraseTabBtn");
+    const narrativeTab = document.getElementById("narrativeTab");
+    const phraseManagerTab = document.getElementById("phraseManagerTab");
+
+    narrativeTabBtn.addEventListener("click", () => {
+      narrativeTab.classList.add("active");
+      phraseManagerTab.classList.remove("active");
+      narrativeTabBtn.classList.add("active");
+      phraseTabBtn.classList.remove("active");
+    });
+    phraseTabBtn.addEventListener("click", () => {
+      phraseManagerTab.classList.add("active");
+      narrativeTab.classList.remove("active");
+      phraseTabBtn.classList.add("active");
+      narrativeTabBtn.classList.remove("active");
+      renderPhraseList();
+    });
+
+    /***** Narrative Tab Functions *****/
     function insertAtCursor(field, value) {
       if (document.selection) {
         field.focus();
@@ -166,27 +380,63 @@
       }
       field.focus();
     }
-
-    // Generate the custom phrase buttons.
+    // Generate phrase buttons for the Narrative tab.
+    // Only phrases with visible===true are shown. They are grouped by section and sorted by order.
     function generatePhraseButtons() {
       const container = document.getElementById("customPhrases");
       container.innerHTML = "";
-      for (const phrase in predefinedPhrases) {
-        const div = document.createElement("div");
-        div.className = "phrase";
-        div.textContent = `{${phrase}}`;
-        // When clicking a phrase, open the prompt for that phrase.
-        div.addEventListener("click", () => {
-          openPhrasePrompt(phrase);
+      let phrasesArr = [];
+      for (const key in predefinedPhrases) {
+        const phrase = predefinedPhrases[key];
+        if (phrase.visible === false) continue;
+        phrase.name = key;
+        phrasesArr.push(phrase);
+      }
+      // Group phrases by section.
+      let groups = {};
+      phrasesArr.forEach(phrase => {
+        const section = phrase.section || "Default";
+        if (!groups[section]) groups[section] = [];
+        groups[section].push(phrase);
+      });
+      // For each group, sort by order and create group header and buttons.
+      for (const section in groups) {
+        const groupDiv = document.createElement("div");
+        // Create collapsible header.
+        const header = document.createElement("h3");
+        header.className = "collapsible-header";
+        header.textContent = section;
+        groupDiv.appendChild(header);
+        // Create container for group content.
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "collapsible-content";
+        groups[section].sort((a, b) => (a.order || 0) - (b.order || 0));
+        groups[section].forEach(phrase => {
+          const btn = document.createElement("div");
+          btn.className = "phrase";
+          btn.textContent = `{${phrase.name}}`;
+          btn.addEventListener("click", () => {
+            openPhrasePrompt(phrase.name);
+          });
+          contentDiv.appendChild(btn);
         });
-        container.appendChild(div);
+        groupDiv.appendChild(contentDiv);
+        // Toggle collapse/expand when header is clicked.
+        header.addEventListener("click", () => {
+          if (contentDiv.style.display === "none") {
+            contentDiv.style.display = "block";
+          } else {
+            contentDiv.style.display = "none";
+          }
+        });
+        // Start with sections expanded.
+        contentDiv.style.display = "block";
+        container.appendChild(groupDiv);
       }
     }
-
-    // Ensure the DOM is loaded before generating buttons.
     document.addEventListener("DOMContentLoaded", generatePhraseButtons);
 
-    // Modal handling
+    /***** Modal for Prompting Phrase Input / Export *****/
     const modalOverlay = document.getElementById("modalOverlay");
     const modalTitle = document.getElementById("modalTitle");
     const modalContent = document.getElementById("modalContent");
@@ -198,23 +448,29 @@
       modalContent.innerHTML = "";
       modalContent.appendChild(contentElement);
       modalOverlay.style.display = "flex";
-
+      modalConfirm.style.display = "block";
+      modalCancel.textContent = "Cancel";
+      
       modalConfirm.onclick = function() {
         confirmCallback();
         closeModal();
       };
-
+      
       modalCancel.onclick = function() {
         closeModal();
       };
     }
-
     function closeModal() {
       modalOverlay.style.display = "none";
+      // Reset buttons for standard usage.
+      modalConfirm.style.display = "block";
+      modalCancel.textContent = "Cancel";
     }
-
-    // Sequentially ask each field for composite tokens, one at a time.
-    // As you answer, update the preview within the modal.
+    // Helper to format a template with placeholders {0}, {1}, etc.
+    function formatTemplate(template, answers) {
+      return template.replace(/{\s*(\d+)\s*}/g, (match, index) => answers[index] || "");
+    }
+    // Sequentially prompt for composite phrase fields with live preview.
     function askSequentialField(key, phraseData, index, answers, finalCallback) {
       if (index >= phraseData.fields.length) {
         finalCallback(answers);
@@ -223,13 +479,13 @@
       const field = phraseData.fields[index];
       const container = document.createElement("div");
       container.style.marginBottom = "10px";
-
+      
       const label = document.createElement("label");
       label.textContent = field.label;
       label.style.display = "block";
       label.style.marginBottom = "5px";
       container.appendChild(label);
-
+      
       let input;
       if (field.type === "select") {
         input = document.createElement("select");
@@ -255,8 +511,8 @@
       input.style.padding = "8px";
       input.style.boxSizing = "border-box";
       container.appendChild(input);
-
-      // Create a live preview area within the modal.
+      
+      // Live preview area.
       const previewDiv = document.createElement("div");
       previewDiv.style.marginTop = "10px";
       previewDiv.style.padding = "10px";
@@ -264,78 +520,69 @@
       previewDiv.style.borderRadius = "4px";
       previewDiv.style.backgroundColor = "#f9f9f9";
       container.appendChild(previewDiv);
-
+      
       function updatePreview() {
-        const totalFields = phraseData.fields.length;
+        const total = phraseData.fields.length;
         const allAnswers = [];
-        for (let i = 0; i < totalFields; i++) {
+        for (let i = 0; i < total; i++) {
           if (i < index) {
             allAnswers.push(answers[i]);
           } else if (i === index) {
-            if (input.tagName.toLowerCase() === "select" && input.multiple) {
-              allAnswers.push(Array.from(input.selectedOptions).map(opt => opt.value).join(", "));
-            } else {
-              allAnswers.push(input.value);
-            }
+            let current = (input.tagName.toLowerCase() === "select" && input.multiple) ?
+              Array.from(input.selectedOptions).map(opt => opt.value).join(", ") :
+              input.value;
+            allAnswers.push(current);
           } else {
-            // For remaining fields, use default if provided, else an empty string.
             allAnswers.push(phraseData.fields[i].default || "");
           }
         }
         let previewText = "";
-        if (typeof phraseData.previewTemplate === "function") {
+        if (phraseData.template) {
+          previewText = formatTemplate(phraseData.template, allAnswers);
+        } else if (typeof phraseData.previewTemplate === "function") {
           previewText = phraseData.previewTemplate(allAnswers);
         } else {
           previewText = allAnswers.join(" ");
         }
         previewDiv.textContent = "Preview: " + previewText;
       }
-
       input.addEventListener("input", updatePreview);
       input.addEventListener("change", updatePreview);
       updatePreview();
-
+      
       showModal(`Enter ${field.label}`, container, () => {
-        let answer;
-        if (input.tagName.toLowerCase() === "select" && input.multiple) {
-          answer = Array.from(input.selectedOptions).map(opt => opt.value).join(", ");
-        } else {
-          answer = input.value;
-        }
+        let answer = (input.tagName.toLowerCase() === "select" && input.multiple) ?
+          Array.from(input.selectedOptions).map(opt => opt.value).join(", ") :
+          input.value;
         answers.push(answer);
-        // Use a short delay to allow modal closing before asking the next question.
         setTimeout(() => {
           askSequentialField(key, phraseData, index + 1, answers, finalCallback);
         }, 100);
       });
     }
-
-    // Open the prompt for a given phrase and insert the result at the cursor.
     function openPhrasePrompt(key) {
       const narrativeField = document.getElementById("narrative");
       const phraseData = predefinedPhrases[key];
       if (!phraseData) {
-        // Fallback if not defined.
         const value = prompt("Enter value for " + key + ":");
         if (value !== null) {
           insertAtCursor(narrativeField, value);
         }
         return;
       }
-      // If composite token with multiple fields, ask questions sequentially.
       if (phraseData.fields) {
         askSequentialField(key, phraseData, 0, [], (answers) => {
           let finalValue = "";
-          if (typeof phraseData.previewTemplate === "function") {
+          if (phraseData.template) {
+            finalValue = formatTemplate(phraseData.template, answers);
+          } else if (typeof phraseData.previewTemplate === "function") {
             finalValue = phraseData.previewTemplate(answers);
           } else {
             finalValue = answers.join(" ");
           }
           insertAtCursor(narrativeField, finalValue);
         });
-      }
-      // For simple select tokens.
-      else if (phraseData.type === "select") {
+      } else if (phraseData.type === "select") {
         const inputElement = document.createElement("select");
         if (phraseData.multiple) inputElement.multiple = true;
         phraseData.options.forEach(option => {
@@ -345,50 +592,32 @@
           inputElement.appendChild(opt);
         });
         if (phraseData.default) {
-          if (phraseData.multiple && Array.isArray(phraseData.default)) {
-            Array.from(inputElement.options).forEach(opt => {
-              if (phraseData.default.includes(opt.value)) {
-                opt.selected = true;
-              }
-            });
-          } else {
-            inputElement.value = phraseData.default;
-          }
+          inputElement.value = phraseData.default;
         }
         showModal(`Enter value for ${key}`, inputElement, () => {
-          let selectedValue;
-          if (phraseData.multiple) {
-            const selectedOptions = Array.from(inputElement.selectedOptions).map(opt => opt.value);
-            selectedValue = selectedOptions.join(", ");
-          } else {
-            selectedValue = inputElement.value;
-          }
+          let selectedValue = (phraseData.multiple) ?
+            Array.from(inputElement.selectedOptions).map(opt => opt.value).join(", ") :
+            inputElement.value;
           insertAtCursor(narrativeField, selectedValue);
         });
-      }
-      // For simple input tokens.
-      else {
+      } else {
         const inputElement = document.createElement("input");
         inputElement.type = "text";
         inputElement.placeholder = phraseData.placeholder || "";
-        if (phraseData.default) {
-          inputElement.value = phraseData.default;
-        }
+        if (phraseData.default) inputElement.value = phraseData.default;
         showModal(`Enter value for ${key}`, inputElement, () => {
           const value = inputElement.value;
           insertAtCursor(narrativeField, value);
         });
       }
     }
-
-    // (Optional) Existing process narrative function for tokens in text.
     const tokenRegex = /{([^}]+)}/g;
     let tokensFound = [];
     let currentTokenIndex = 0;
     document.getElementById("process").addEventListener("click", () => {
       const narrativeField = document.getElementById("narrative");
-      const narrativeText = narrativeField.value;
-      tokensFound = [...narrativeText.matchAll(tokenRegex)];
+      const text = narrativeField.value;
+      tokensFound = [...text.matchAll(tokenRegex)];
       currentTokenIndex = 0;
       processNextToken(narrativeField);
     });
@@ -402,13 +631,14 @@
         if (phraseData.fields) {
           askSequentialField(key, phraseData, 0, [], (answers) => {
             let finalValue = "";
-            if (typeof phraseData.previewTemplate === "function") {
+            if (phraseData.template) {
+              finalValue = formatTemplate(phraseData.template, answers);
+            } else if (typeof phraseData.previewTemplate === "function") {
               finalValue = phraseData.previewTemplate(answers);
             } else {
               finalValue = answers.join(" ");
             }
-            const updatedText = narrativeField.value.replace(fullMatch, finalValue);
-            narrativeField.value = updatedText;
+            narrativeField.value = narrativeField.value.replace(fullMatch, finalValue);
             currentTokenIndex++;
             processNextToken(narrativeField);
           });
@@ -422,26 +652,13 @@
             inputElement.appendChild(opt);
           });
           if (phraseData.default) {
-            if (phraseData.multiple && Array.isArray(phraseData.default)) {
-              Array.from(inputElement.options).forEach(opt => {
-                if (phraseData.default.includes(opt.value)) {
-                  opt.selected = true;
-                }
-              });
-            } else {
-              inputElement.value = phraseData.default;
-            }
+            inputElement.value = phraseData.default;
           }
           showModal(`Enter value for ${key}`, inputElement, () => {
-            let selectedValue;
-            if (phraseData.multiple) {
-              const selectedOptions = Array.from(inputElement.selectedOptions).map(opt => opt.value);
-              selectedValue = selectedOptions.join(", ");
-            } else {
-              selectedValue = inputElement.value;
-            }
-            const updatedText = narrativeField.value.replace(fullMatch, selectedValue);
-            narrativeField.value = updatedText;
+            let selectedValue = (phraseData.multiple) ?
+              Array.from(inputElement.selectedOptions).map(opt => opt.value).join(", ") :
+              inputElement.value;
+            narrativeField.value = narrativeField.value.replace(fullMatch, selectedValue);
             currentTokenIndex++;
             processNextToken(narrativeField);
           });
@@ -452,20 +669,384 @@
           if (phraseData.default) inputElement.value = phraseData.default;
           showModal(`Enter value for ${key}`, inputElement, () => {
             const value = inputElement.value;
-            const updatedText = narrativeField.value.replace(fullMatch, value);
-            narrativeField.value = updatedText;
+            narrativeField.value = narrativeField.value.replace(fullMatch, value);
             currentTokenIndex++;
             processNextToken(narrativeField);
           });
         }
       } else {
         const userInput = prompt(`Enter value for ${key}:`);
-        const updatedText = narrativeField.value.replace(fullMatch, userInput || "");
-        narrativeField.value = updatedText;
+        narrativeField.value = narrativeField.value.replace(fullMatch, userInput || "");
         currentTokenIndex++;
         processNextToken(narrativeField);
       }
     }
+
+    /***** Phrase Manager Functions *****/
+    const phraseList = document.getElementById("phraseList");
+    const createPhraseBtn = document.getElementById("createPhraseBtn");
+    const exportPhraseBtn = document.getElementById("exportPhraseBtn");
+    const phraseFormModal = document.getElementById("phraseFormModal");
+    const phraseFormContainer = document.getElementById("phraseFormContainer");
+    const phraseForm = document.getElementById("phraseForm");
+    const phraseNameInput = document.getElementById("phraseName");
+    const compositeCheckbox = document.getElementById("compositeCheckbox");
+    const simplePhraseFields = document.getElementById("simplePhraseFields");
+    const compositePhraseFields = document.getElementById("compositePhraseFields");
+    const simpleFieldType = document.getElementById("simpleFieldType");
+    const simpleOptionsContainer = document.getElementById("simpleOptionsContainer");
+    const addFieldButton = document.getElementById("addFieldButton");
+    const compositeFieldsContainer = document.getElementById("compositeFieldsContainer");
+    const cancelPhraseBtn = document.getElementById("cancelPhraseBtn");
+    const formTitle = document.getElementById("formTitle");
+    const insertionTemplateInput = document.getElementById("insertionTemplate");
+    const phraseSectionInput = document.getElementById("phraseSection");
+    const phraseVisibleInput = document.getElementById("phraseVisible");
+
+    let editingPhraseKey = null; // null when creating new phrase
+
+    function showPhraseFormModal() {
+      phraseFormModal.style.display = "flex";
+    }
+    function hidePhraseFormModal() {
+      phraseFormModal.style.display = "none";
+    }
+
+    compositeCheckbox.addEventListener("change", () => {
+      if (compositeCheckbox.checked) {
+        simplePhraseFields.style.display = "none";
+        compositePhraseFields.style.display = "block";
+        compositeFieldsContainer.innerHTML = "";
+        addCompositeFieldRow();
+      } else {
+        simplePhraseFields.style.display = "block";
+        compositePhraseFields.style.display = "none";
+      }
+    });
+    simpleFieldType.addEventListener("change", () => {
+      if (simpleFieldType.value === "select") {
+        simpleOptionsContainer.style.display = "block";
+      } else {
+        simpleOptionsContainer.style.display = "none";
+      }
+    });
+    function addCompositeFieldRow() {
+      const row = document.createElement("div");
+      row.className = "field-row";
+      row.innerHTML = `
+        <div>
+          <label>Field Label:</label>
+          <input type="text" class="field-label" required />
+        </div>
+        <div>
+          <label>Field Type:</label>
+          <select class="field-type">
+            <option value="input">Input</option>
+            <option value="select">Select</option>
+          </select>
+        </div>
+        <div class="field-multiple-container" style="display:none;">
+          <label>Multiple Select?</label>
+          <input type="checkbox" class="field-multiple" />
+        </div>
+        <div>
+          <label>Placeholder:</label>
+          <input type="text" class="field-placeholder" />
+        </div>
+        <div>
+          <label>Default Value:</label>
+          <input type="text" class="field-default" />
+        </div>
+        <div class="field-options-container" style="display:none;">
+          <label>Options (comma separated):</label>
+          <input type="text" class="field-options" />
+        </div>
+        <button type="button" class="remove-field">Remove Field</button>
+      `;
+      const fieldTypeSelect = row.querySelector(".field-type");
+      const optionsContainer = row.querySelector(".field-options-container");
+      const multipleContainer = row.querySelector(".field-multiple-container");
+      fieldTypeSelect.addEventListener("change", () => {
+        if (fieldTypeSelect.value === "select") {
+          optionsContainer.style.display = "block";
+          multipleContainer.style.display = "block";
+        } else {
+          optionsContainer.style.display = "none";
+          multipleContainer.style.display = "none";
+        }
+      });
+      row.querySelector(".remove-field").addEventListener("click", () => {
+        compositeFieldsContainer.removeChild(row);
+      });
+      compositeFieldsContainer.appendChild(row);
+    }
+    addFieldButton.addEventListener("click", addCompositeFieldRow);
+
+    createPhraseBtn.addEventListener("click", () => {
+      editingPhraseKey = null;
+      formTitle.textContent = "Create New Phrase";
+      phraseForm.reset();
+      simplePhraseFields.style.display = "block";
+      compositePhraseFields.style.display = "none";
+      showPhraseFormModal();
+    });
+    cancelPhraseBtn.addEventListener("click", () => {
+      hidePhraseFormModal();
+    });
+    exportPhraseBtn.addEventListener("click", () => {
+      const exportText = "const predefinedPhrases = " + JSON.stringify(predefinedPhrases, null, 2) + ";";
+      const textArea = document.createElement("textarea");
+      textArea.style.width = "100%";
+      textArea.style.height = "200px";
+      textArea.value = exportText;
+      modalConfirm.style.display = "none";
+      modalCancel.textContent = "Close";
+      showModal("Export Phrases", textArea, () => {});
+    });
+    function renderPhraseList() {
+      phraseList.innerHTML = "";
+      let phrasesArr = [];
+      for (const key in predefinedPhrases) {
+        const ph = predefinedPhrases[key];
+        ph.name = key;
+        phrasesArr.push(ph);
+      }
+      // Group by section.
+      let groups = {};
+      phrasesArr.forEach(ph => {
+        const sec = ph.section || "Default";
+        if (!groups[sec]) groups[sec] = [];
+        groups[sec].push(ph);
+      });
+      for (const sec in groups) {
+        const groupDiv = document.createElement("div");
+        const header = document.createElement("h3");
+        header.textContent = sec;
+        header.className = "collapsible-header";
+        groupDiv.appendChild(header);
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "collapsible-content";
+        groups[sec].sort((a, b) => (a.order || 0) - (b.order || 0));
+        groups[sec].forEach(ph => {
+          const item = document.createElement("div");
+          item.className = "phrase-item";
+          const span = document.createElement("span");
+          span.textContent = ph.name;
+          item.appendChild(span);
+          const actions = document.createElement("div");
+          actions.className = "phrase-actions";
+          const upBtn = document.createElement("button");
+          upBtn.textContent = "Up";
+          upBtn.addEventListener("click", () => { movePhrase(ph.name, -1); });
+          const downBtn = document.createElement("button");
+          downBtn.textContent = "Down";
+          downBtn.addEventListener("click", () => { movePhrase(ph.name, 1); });
+          const editBtn = document.createElement("button");
+          editBtn.textContent = "Edit";
+          editBtn.addEventListener("click", () => {
+            loadPhraseForEditing(ph.name);
+          });
+          const deleteBtn = document.createElement("button");
+          deleteBtn.textContent = "Delete";
+          deleteBtn.className = "delete";
+          deleteBtn.addEventListener("click", () => {
+            if (confirm(`Delete phrase "${ph.name}"?`)) {
+              delete predefinedPhrases[ph.name];
+              renderPhraseList();
+              generatePhraseButtons();
+            }
+          });
+          actions.appendChild(upBtn);
+          actions.appendChild(downBtn);
+          actions.appendChild(editBtn);
+          actions.appendChild(deleteBtn);
+          item.appendChild(actions);
+          contentDiv.appendChild(item);
+        });
+        // Start with sections expanded.
+        contentDiv.style.display = "block";
+        // Toggle collapse/expand on header click.
+        header.addEventListener("click", () => {
+          if (contentDiv.style.display === "none") {
+            contentDiv.style.display = "block";
+          } else {
+            contentDiv.style.display = "none";
+          }
+        });
+        groupDiv.appendChild(contentDiv);
+        phraseList.appendChild(groupDiv);
+      }
+    }
+    function movePhrase(key, delta) {
+      const ph = predefinedPhrases[key];
+      if (!ph) return;
+      const sec = ph.section || "Default";
+      let arr = [];
+      for (const k in predefinedPhrases) {
+        const p = predefinedPhrases[k];
+        if ((p.section || "Default") === sec) {
+          p.name = k;
+          arr.push(p);
+        }
+      }
+      arr.sort((a, b) => (a.order || 0) - (b.order || 0));
+      const idx = arr.findIndex(p => p.name === key);
+      if (idx === -1) return;
+      const newIndex = idx + delta;
+      if (newIndex < 0 || newIndex >= arr.length) return;
+      const temp = arr[idx].order;
+      arr[idx].order = arr[newIndex].order;
+      arr[newIndex].order = temp;
+      predefinedPhrases[arr[idx].name].order = arr[idx].order;
+      predefinedPhrases[arr[newIndex].name].order = arr[newIndex].order;
+      renderPhraseList();
+      generatePhraseButtons();
+    }
+    function loadPhraseForEditing(key) {
+      editingPhraseKey = key;
+      formTitle.textContent = "Edit Phrase: " + key;
+      const phrase = predefinedPhrases[key];
+      phraseNameInput.value = key;
+      // Load Section and Visible.
+      phraseSectionInput.value = phrase.section || "";
+      phraseVisibleInput.checked = phrase.visible !== false;
+      if (phrase.fields) {
+        compositeCheckbox.checked = true;
+        simplePhraseFields.style.display = "none";
+        compositePhraseFields.style.display = "block";
+        compositeFieldsContainer.innerHTML = "";
+        phrase.fields.forEach(field => {
+          const row = document.createElement("div");
+          row.className = "field-row";
+          row.innerHTML = `
+            <div>
+              <label>Field Label:</label>
+              <input type="text" class="field-label" required value="${field.label}" />
+            </div>
+            <div>
+              <label>Field Type:</label>
+              <select class="field-type">
+                <option value="input">Input</option>
+                <option value="select">Select</option>
+              </select>
+            </div>
+            <div class="field-multiple-container" style="display:none;">
+              <label>Multiple Select?</label>
+              <input type="checkbox" class="field-multiple" />
+            </div>
+            <div>
+              <label>Placeholder:</label>
+              <input type="text" class="field-placeholder" value="${field.placeholder || ""}" />
+            </div>
+            <div>
+              <label>Default Value:</label>
+              <input type="text" class="field-default" value="${field.default || ""}" />
+            </div>
+            <div class="field-options-container" style="display:none;">
+              <label>Options (comma separated):</label>
+              <input type="text" class="field-options" value="${field.options ? field.options.join(", ") : ""}" />
+            </div>
+            <button type="button" class="remove-field">Remove Field</button>
+          `;
+          const fieldTypeSelect = row.querySelector(".field-type");
+          const optionsContainer = row.querySelector(".field-options-container");
+          const multipleContainer = row.querySelector(".field-multiple-container");
+          fieldTypeSelect.value = field.type;
+          if (field.type === "select") {
+            optionsContainer.style.display = "block";
+            multipleContainer.style.display = "block";
+            row.querySelector(".field-multiple").checked = field.multiple ? true : false;
+          }
+          fieldTypeSelect.addEventListener("change", () => {
+            if (fieldTypeSelect.value === "select") {
+              optionsContainer.style.display = "block";
+              multipleContainer.style.display = "block";
+            } else {
+              optionsContainer.style.display = "none";
+              multipleContainer.style.display = "none";
+            }
+          });
+          row.querySelector(".remove-field").addEventListener("click", () => {
+            compositeFieldsContainer.removeChild(row);
+          });
+          compositeFieldsContainer.appendChild(row);
+        });
+        insertionTemplateInput.value = phrase.template || "";
+      } else {
+        compositeCheckbox.checked = false;
+        simplePhraseFields.style.display = "block";
+        compositePhraseFields.style.display = "none";
+        simpleFieldType.value = phrase.type;
+        document.getElementById("simplePlaceholder").value = phrase.placeholder || "";
+        document.getElementById("simpleDefault").value = phrase.default || "";
+        if (phrase.type === "select") {
+          simpleOptionsContainer.style.display = "block";
+          document.getElementById("simpleOptions").value = phrase.options ? phrase.options.join(", ") : "";
+        } else {
+          simpleOptionsContainer.style.display = "none";
+        }
+      }
+      showPhraseFormModal();
+    }
+    phraseForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = phraseNameInput.value.trim();
+      if (!name) return;
+      let newPhrase;
+      if (!compositeCheckbox.checked) {
+        const type = simpleFieldType.value;
+        const placeholder = document.getElementById("simplePlaceholder").value;
+        const def = document.getElementById("simpleDefault").value;
+        if (type === "select") {
+          const options = document.getElementById("simpleOptions").value.split(",").map(s => s.trim()).filter(s => s);
+          newPhrase = { type, placeholder, default: def, options };
+        } else {
+          newPhrase = { type, placeholder, default: def };
+        }
+      } else {
+        const fields = [];
+        const fieldRows = compositeFieldsContainer.querySelectorAll(".field-row");
+        fieldRows.forEach(row => {
+          const label = row.querySelector(".field-label").value.trim();
+          if (!label) return;
+          const type = row.querySelector(".field-type").value;
+          const placeholder = row.querySelector(".field-placeholder").value;
+          const def = row.querySelector(".field-default").value;
+          const multiple = row.querySelector(".field-multiple").checked;
+          let fieldObj = { label, type, placeholder, default: def };
+          if (type === "select") {
+            const options = row.querySelector(".field-options").value.split(",").map(s => s.trim()).filter(s => s);
+            fieldObj.options = options;
+            fieldObj.multiple = multiple;
+          }
+          fields.push(fieldObj);
+        });
+        const template = insertionTemplateInput.value.trim();
+        if (template) {
+          newPhrase = { fields, template };
+        } else {
+          newPhrase = { fields, previewTemplate: (vals) => vals.join(" ") };
+        }
+      }
+      // New fields for section and visibility.
+      const section = phraseSectionInput.value.trim();
+      const visible = phraseVisibleInput.checked;
+      newPhrase.section = section;
+      newPhrase.visible = visible;
+      if (!editingPhraseKey) {
+        newPhrase.order = Date.now();
+      } else {
+        newPhrase.order = predefinedPhrases[editingPhraseKey].order || Date.now();
+      }
+      if (editingPhraseKey && editingPhraseKey !== name) {
+        delete predefinedPhrases[editingPhraseKey];
+      }
+      predefinedPhrases[name] = newPhrase;
+      renderPhraseList();
+      generatePhraseButtons();
+      hidePhraseFormModal();
+      phraseForm.reset();
+    });
   </script>
 </body>
 </html>
