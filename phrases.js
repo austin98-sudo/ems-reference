@@ -285,33 +285,6 @@ const predefinedPhrases = {
     "order": 9000,
     "name": "pulm"
   },
-  "abd/gi/gu": {
-    "fields": [
-      {
-        "label": "Abdominal pain",
-        "type": "input",
-        "placeholder": "",
-        "default": "Pt denies any abdominal pain"
-      },
-      {
-        "label": "Abdomen palpation",
-        "type": "input",
-        "placeholder": "",
-        "default": "no pain, rigidity, tenderness noted"
-      },
-      {
-        "label": "Bathroom habits",
-        "type": "input",
-        "placeholder": "",
-        "default": "Pt reports no pain or discomfort when using the bathroom. Pt also reports normal bathroom habits"
-      }
-    ],
-    "template": "{0}. All four quadrants were palpated with {1}. Pt reports {2}",
-    "section": "Pre-Generated",
-    "visible": false,
-    "order": 10000,
-    "name": "abd/gi/gu"
-  },
   "ms/ortho/skin": {
     "fields": [
       {
@@ -559,5 +532,62 @@ const predefinedPhrases = {
     "visible": false,
     "order": 12000,
     "name": "soc/psych"
+  },
+  "12-lead": {
+    "fields": [
+      {
+        "label": "Interpretation",
+        "type": "input",
+        "placeholder": "",
+        "default": "sinus rhythm"
+      }
+    ],
+    "template": "A 12-lead was performed and interpreted as {0}.",
+    "section": "Procedure",
+    "visible": true,
+    "order": 1741102227469,
+    "name": "12-lead"
+  },
+  "BGL": {
+    "fields": [
+      {
+        "label": "BGL Reading",
+        "type": "input",
+        "placeholder": "",
+        "default": ""
+      }
+    ],
+    "template": "A blood glucose analysis was performed and noted to be {0}mg/dL.",
+    "section": "Procedure",
+    "visible": true,
+    "order": 1741102314309,
+    "name": "BGL"
+  },
+  "abd/gi/gu": {
+    "fields": [
+      {
+        "label": "Abdominal pain",
+        "type": "input",
+        "placeholder": "",
+        "default": "Pt denies any abdominal pain"
+      },
+      {
+        "label": "Abdomen palpation",
+        "type": "input",
+        "placeholder": "",
+        "default": "no pain, rigidity, or tenderness noted"
+      },
+      {
+        "label": "Bathroom habits",
+        "type": "input",
+        "placeholder": "",
+        "default": "Pt reports no pain or discomfort when using the bathroom. Pt also reports normal bathroom habits with no discolorations."
+      }
+    ],
+    "template": "{0}. All four quadrants were palpated with {1}. Pt reports {2}",
+    "section": "Pre-Generated",
+    "visible": false,
+    "order": 10000,
+    "name": "abd/gi/gu"
   }
 };
