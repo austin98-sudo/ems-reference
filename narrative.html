@@ -43,7 +43,7 @@
       font-weight: bold;
     }
     /* Container styles */
-    .container,.container-grid {
+    .container, .container-grid {
       display: none;
       padding: 20px;
     }
@@ -117,7 +117,7 @@
     .phrase-actions button {
       margin-left: 5px;
       background: #4a90e2;
-      margin-top: 0
+      margin-top: 0;
     }
     .phrase-actions button.delete {
       background: #e74c3c;
@@ -194,26 +194,6 @@
     #phraseFormContainer h3 {
       margin-top: 0;
     }
-    #phraseFormContainer .field-row {
-      border: 1px solid #ddd;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 4px;
-    }
-    #phraseFormContainer .field-row > div {
-      margin-bottom: 5px;
-    }
-    #phraseFormContainer .remove-field {
-      background: #e74c3c;
-      color: white;
-      border: none;
-      border-radius: 3px;
-      cursor: pointer;
-      padding: 5px;
-    }
-    #phraseFormContainer .remove-field:hover {
-      background: #c0392b;
-    }
     /* Scrollable composite fields container */
     #compositeFieldsContainer {
       max-height: 300px;
@@ -222,6 +202,48 @@
       padding: 5px;
       border-radius: 4px;
     }
+    /* New styles for composite field rows */
+    .field-row {
+      position: relative;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      transition: border 0.3s;
+    }
+    .field-row:focus-within {
+      border: 2px solid #4a90e2;
+    }
+    .field-row-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f0f0f0;
+      padding: 5px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .field-row-header span {
+      font-weight: bold;
+    }
+    .field-row-controls button {
+      padding: 5px;
+      font-size: 0.9em;
+      background: #4a90e2;
+      border: none;
+      border-radius: 3px;
+      color: white;
+      cursor: pointer;
+      width: 100px;
+      margin: 5px!important
+    }
+    .field-row-controls button:hover {
+      background: #407ac1;
+    }
+    .field-row-body {
+      margin-top: 10px;
+    }
+
   </style>
   <script src="./phrases.js"></script>
 </head>
@@ -238,7 +260,28 @@
       <textarea id="narrative" placeholder="Type your narrative here...">
 D- {dispatch info}.
 
-C- {complaints}.</textarea>
+C- {complaints}
+
+H- 
+
+A- {arrival}
+
+ABC: {abc}
+NEURO: {neuro}
+HEENT: {heent}
+CV: {cv}
+PULM: {pulm}
+GI/GU/ABD: {abd/gi/gu}
+MS/Ortho/Skin: {ms/ortho/skin}
+SOC/PSYCH: {soc/psych}
+
+During transport Pt remained stable.
+
+R- (Scene) Vitals and an assessment was performed. (Transport) Pt was monitored and vitals were reassessed as needed.
+
+T- Once Pt gave verbal consent to be transported to the hospital the {move to stretcher}. Once the Pt was secured the stretcher was moved out to the ambulance without incident. The stretcher was loaded into the ambulance and secured via an auto-load system. {transport}. Upon arrival to the hospital the stretcher was unloaded and the Pt was taken inside without incident. Once inside, the Pt was registered and taken to {hospital transfer}. At this time a verbal report was given to a nurse and care was transferred.
+
+E- None</textarea>
       <button style="width: 100%" id="process">Process Narrative</button>
     </div>
     <div class="phrases-container">
@@ -743,47 +786,63 @@ C- {complaints}.</textarea>
       const row = document.createElement("div");
       row.className = "field-row";
       row.innerHTML = `
-        <div>
-          <label>Field Label:</label>
-          <input type="text" class="field-label" required />
+        <div class="field-row-header">
+          <span class="field-title">New Field</span>
+          <div class="field-row-controls">
+            <button type="button" class="toggle-field">Toggle</button>
+            <button type="button" class="move-up">Up</button>
+            <button type="button" class="move-down">Down</button>
+            <button type="button" class="remove-field">Remove Field</button>
+          </div>
         </div>
-        <div>
-          <label>Field Type:</label>
-          <select class="field-type">
-            <option value="input">Input</option>
-            <option value="select">Select</option>
-          </select>
+        <div class="field-row-body">
+          <div>
+            <label>Field Label:</label>
+            <input type="text" class="field-label" required />
+          </div>
+          <div>
+            <label>Field Type:</label>
+            <select class="field-type">
+              <option value="input">Input</option>
+              <option value="select">Select</option>
+            </select>
+          </div>
+          <div class="field-multiple-container" style="display:none;">
+            <label>Multiple Select?</label>
+            <input type="checkbox" class="field-multiple" />
+          </div>
+          <div>
+            <label>Placeholder:</label>
+            <input type="text" class="field-placeholder" />
+          </div>
+          <div>
+            <label>Default Value:</label>
+            <input type="text" class="field-default" />
+          </div>
+          <div class="field-options-container" style="display:none;">
+            <label>Options (comma separated):</label>
+            <input type="text" class="field-options" />
+          </div>
         </div>
-        <div class="field-multiple-container" style="display:none;">
-          <label>Multiple Select?</label>
-          <input type="checkbox" class="field-multiple" />
-        </div>
-        <div>
-          <label>Placeholder:</label>
-          <input type="text" class="field-placeholder" />
-        </div>
-        <div>
-          <label>Default Value:</label>
-          <input type="text" class="field-default" />
-        </div>
-        <div class="field-options-container" style="display:none;">
-          <label>Options (comma separated):</label>
-          <input type="text" class="field-options" />
-        </div>
-        <button type="button" class="remove-field">Remove Field</button>
       `;
-      const fieldTypeSelect = row.querySelector(".field-type");
-      const optionsContainer = row.querySelector(".field-options-container");
-      const multipleContainer = row.querySelector(".field-multiple-container");
-      fieldTypeSelect.addEventListener("change", () => {
-        if (fieldTypeSelect.value === "select") {
-          optionsContainer.style.display = "block";
-          multipleContainer.style.display = "block";
-        } else {
-          optionsContainer.style.display = "none";
-          multipleContainer.style.display = "none";
+      // Toggle collapse/expand for the field row.
+      row.querySelector(".toggle-field").addEventListener("click", () => {
+        const body = row.querySelector(".field-row-body");
+        body.style.display = (body.style.display === "none") ? "block" : "none";
+      });
+      // Move up functionality.
+      row.querySelector(".move-up").addEventListener("click", () => {
+        if(row.previousElementSibling) {
+          row.parentElement.insertBefore(row, row.previousElementSibling);
         }
       });
+      // Move down functionality.
+      row.querySelector(".move-down").addEventListener("click", () => {
+        if(row.nextElementSibling) {
+          row.parentElement.insertBefore(row.nextElementSibling, row);
+        }
+      });
+      // Remove field.
       row.querySelector(".remove-field").addEventListener("click", () => {
         compositeFieldsContainer.removeChild(row);
       });
@@ -928,53 +987,72 @@ C- {complaints}.</textarea>
           const row = document.createElement("div");
           row.className = "field-row";
           row.innerHTML = `
-            <div>
-              <label>Field Label:</label>
-              <input type="text" class="field-label" required value="${field.label}" />
+            <div class="field-row-header">
+              <span class="field-title">${field.label || 'New Field'}</span>
+              <div class="field-row-controls">
+                <button type="button" class="toggle-field">Toggle</button>
+                <button type="button" class="move-up">Up</button>
+                <button type="button" class="move-down">Down</button>
+                <button type="button" class="remove-field">Remove Field</button>
+              </div>
             </div>
-            <div>
-              <label>Field Type:</label>
-              <select class="field-type">
-                <option value="input">Input</option>
-                <option value="select">Select</option>
-              </select>
+            <div class="field-row-body" style="display:none">
+              <div>
+                <label>Field Label:</label>
+                <input type="text" class="field-label" required value="${field.label}" />
+              </div>
+              <div>
+                <label>Field Type:</label>
+                <select class="field-type">
+                  <option value="input">Input</option>
+                  <option value="select">Select</option>
+                </select>
+              </div>
+              <div class="field-multiple-container" style="display:none;">
+                <label>Multiple Select?</label>
+                <input type="checkbox" class="field-multiple" ${field.multiple ? "checked" : ""} />
+              </div>
+              <div>
+                <label>Placeholder:</label>
+                <input type="text" class="field-placeholder" value="${field.placeholder || ""}" />
+              </div>
+              <div>
+                <label>Default Value:</label>
+                <input type="text" class="field-default" value="${field.default || ""}" />
+              </div>
+              <div class="field-options-container" style="display:none;">
+                <label>Options (comma separated):</label>
+                <input type="text" class="field-options" value="${field.options ? field.options.join(", ") : ""}" />
+              </div>
             </div>
-            <div class="field-multiple-container" style="display:none;">
-              <label>Multiple Select?</label>
-              <input type="checkbox" class="field-multiple" />
-            </div>
-            <div>
-              <label>Placeholder:</label>
-              <input type="text" class="field-placeholder" value="${field.placeholder || ""}" />
-            </div>
-            <div>
-              <label>Default Value:</label>
-              <input type="text" class="field-default" value="${field.default || ""}" />
-            </div>
-            <div class="field-options-container" style="display:none;">
-              <label>Options (comma separated):</label>
-              <input type="text" class="field-options" value="${field.options ? field.options.join(", ") : ""}" />
-            </div>
-            <button type="button" class="remove-field">Remove Field</button>
           `;
+          // Set the field type value.
           const fieldTypeSelect = row.querySelector(".field-type");
+          fieldTypeSelect.value = field.type;
           const optionsContainer = row.querySelector(".field-options-container");
           const multipleContainer = row.querySelector(".field-multiple-container");
-          fieldTypeSelect.value = field.type;
           if (field.type === "select") {
             optionsContainer.style.display = "block";
             multipleContainer.style.display = "block";
-            row.querySelector(".field-multiple").checked = field.multiple ? true : false;
           }
-          fieldTypeSelect.addEventListener("change", () => {
-            if (fieldTypeSelect.value === "select") {
-              optionsContainer.style.display = "block";
-              multipleContainer.style.display = "block";
-            } else {
-              optionsContainer.style.display = "none";
-              multipleContainer.style.display = "none";
+          // Toggle collapse/expand.
+          row.querySelector(".toggle-field").addEventListener("click", () => {
+            const body = row.querySelector(".field-row-body");
+            body.style.display = (body.style.display === "none") ? "block" : "none";
+          });
+          // Move up.
+          row.querySelector(".move-up").addEventListener("click", () => {
+            if(row.previousElementSibling) {
+              row.parentElement.insertBefore(row, row.previousElementSibling);
             }
           });
+          // Move down.
+          row.querySelector(".move-down").addEventListener("click", () => {
+            if(row.nextElementSibling) {
+              row.parentElement.insertBefore(row.nextElementSibling, row);
+            }
+          });
+          // Remove field.
           row.querySelector(".remove-field").addEventListener("click", () => {
             compositeFieldsContainer.removeChild(row);
           });
@@ -1021,7 +1099,7 @@ C- {complaints}.</textarea>
           const type = row.querySelector(".field-type").value;
           const placeholder = row.querySelector(".field-placeholder").value;
           const def = row.querySelector(".field-default").value;
-          const multiple = row.querySelector(".field-multiple").checked;
+          const multiple = row.querySelector(".field-multiple") ? row.querySelector(".field-multiple").checked : false;
           let fieldObj = { label, type, placeholder, default: def };
           if (type === "select") {
             const options = row.querySelector(".field-options").value.split(",").map(s => s.trim()).filter(s => s);

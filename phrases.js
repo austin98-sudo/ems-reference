@@ -47,9 +47,15 @@ const predefinedPhrases = {
           "Non-emergent"
         ],
         "multiple": false
+      },
+      {
+        "label": "Secondary information",
+        "type": "input",
+        "placeholder": "Call details",
+        "default": ""
       }
     ],
-    "template": "{0} was dispatched for {1}. {2} {3} responded {4}",
+    "template": "{0} was dispatched for {1}. {2} {3} responded {4}. Secondary information provided was {5}.",
     "section": "Pre-Generated",
     "visible": false,
     "order": 1000,
@@ -58,9 +64,26 @@ const predefinedPhrases = {
   "complaints": {
     "fields": [
       {
-        "label": "Chief complaint",
+        "label": "Age",
         "type": "input",
-        "placeholder": "chest pain, shortness of breath, etc.",
+        "placeholder": "",
+        "default": ""
+      },
+      {
+        "label": "Gender",
+        "type": "select",
+        "placeholder": "",
+        "default": "",
+        "options": [
+          "M",
+          "F"
+        ],
+        "multiple": false
+      },
+      {
+        "label": "Chief Complaint",
+        "type": "input",
+        "placeholder": "chest pain, SOB, etc...",
         "default": ""
       },
       {
@@ -70,7 +93,7 @@ const predefinedPhrases = {
         "default": "Pt denies any secondary complaints"
       }
     ],
-    "template": "Pt's chief complaint is {0}. {1}",
+    "template": "Pt presents to EMS as a {0} YO{1} who has {2}. {3}.",
     "section": "Pre-Generated",
     "visible": false,
     "order": 2000,
@@ -111,13 +134,13 @@ const predefinedPhrases = {
         "default": ""
       },
       {
-        "label": "alert and oriented",
+        "label": "Alert Status",
         "type": "input",
         "placeholder": "",
-        "default": "alert and oriented to person, place, time, and event."
+        "default": "acknowledges providers and answers questions appropriately"
       }
     ],
-    "template": "Upon arrival the Pt was found {0}. Pt is {1}",
+    "template": "Upon arrival the Pt was found {0}. Pt {1}.",
     "section": "Pre-Generated",
     "visible": false,
     "order": 4000,
@@ -337,10 +360,10 @@ const predefinedPhrases = {
         "multiple": false
       }
     ],
-    "template": "Pt was moved to the stretcher via {0}. Once Pt was on the stretcher, the Pt was secured via seat belts x3 with shoulder straps and both rails raised. Pt was placed in a {1} position",
+    "template": "Pt was moved to the stretcher via {0}. Once the Pt was on the stretcher, the Pt was secured via seat belts x3 with shoulder straps and both rails raised. Pt was placed in a {1} position",
     "section": "Pre-Generated",
     "visible": false,
-    "order": 12000,
+    "order": 13000,
     "name": "move to stretcher"
   },
   "transport": {
@@ -384,7 +407,7 @@ const predefinedPhrases = {
     "template": "Pt was transported to {0}, {1}. During transport {0} was contacted and given a med report via {2}",
     "section": "Pre-Generated",
     "visible": false,
-    "order": 13000,
+    "order": 14000,
     "name": "transport"
   },
   "hospital transfer": {
@@ -427,7 +450,7 @@ const predefinedPhrases = {
     "template": "{0}. {1} via {2}",
     "section": "Pre-Generated",
     "visible": false,
-    "order": 14000,
+    "order": 1741101495163,
     "name": "hospital transfer"
   },
   "iv insertion": {
@@ -515,5 +538,26 @@ const predefinedPhrases = {
     "visible": true,
     "order": 1740625534116,
     "name": "adenosine"
+  },
+  "soc/psych": {
+    "fields": [
+      {
+        "label": "Drugs",
+        "type": "input",
+        "placeholder": "",
+        "default": "Pt denies any drug use"
+      },
+      {
+        "label": "Alcohol",
+        "type": "input",
+        "placeholder": "",
+        "default": "Pt denies any alcohol use"
+      }
+    ],
+    "template": "{0}. {1}.",
+    "section": "Pre-Generated",
+    "visible": false,
+    "order": 12000,
+    "name": "soc/psych"
   }
 };
