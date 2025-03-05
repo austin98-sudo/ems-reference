@@ -2,26 +2,24 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Narrative &amp; Phrase Manager</title>
+  <title>Narrative, Phrase & Template Manager</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <style>
-    /* Basic resets and fonts */
-    body {
+   /* Basic resets and fonts */
+   body {
       font-family: 'Roboto', sans-serif;
       margin: 0;
       padding: 0;
       background: #f5f7fa;
       color: #333;
     }
-    header {
-      background: #4a90e2;
-      color: white;
-      padding: 20px;
-      text-align: center;
-      font-size: 1.5em;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    h2 {
+      margin-top: 0
     }
-    /* Tab navigation styles */
+    select {
+      font-size: 1.25em;
+    }
+    /* Tab Navigation */
     #tabs {
       display: flex;
       background: #fff;
@@ -37,30 +35,25 @@
       cursor: pointer;
       color: black;
       margin-top: 0;
+      border-radius: 0;
     }
     #tabs button.active {
       border-bottom: 2px solid #4a90e2;
       font-weight: bold;
     }
-    /* Container styles */
+    /* Containers */
     .container, .container-grid {
       display: none;
       padding: 20px;
     }
-    .container.active {
+    .container.active, .container-grid.active {
       display: block;
     }
-    .container-grid.active {
+    /* Narrative Tab: 75% textarea, 25% custom phrases */
+    #narrativeTab {
       display: grid;
-      grid-template-columns: 3fr 1fr;
+      grid-template-columns: 75% 25%;
       grid-column-gap: 10px;
-    }
-    .narrative-container, .phrases-container {
-      margin-bottom: 20px;
-    }
-    .phrases-container {
-      height: 550px;
-      overflow-y: scroll;
     }
     textarea {
       width: 100%;
@@ -85,6 +78,14 @@
     button:hover {
       background: #407ac1;
     }
+    button.move-up, button.move-down,button.remove-field {
+      margin-top: 0;
+    }
+    /* Custom Phrases column */
+    .phrases-container {
+      height: 550px;
+      overflow-y: auto;
+    }
     .phrase {
       background: #e9eff6;
       border: 1px solid #cfdbe3;
@@ -98,8 +99,27 @@
     .phrase:hover {
       background: #d8e2ed;
     }
-    /* List styles for phrase manager */
-    #phraseList {
+    /* Collapsible Sections */
+    .collapsible-header {
+      cursor: pointer;
+      background: #ddd;
+      padding: 8px;
+      border-radius: 4px;
+      margin-bottom: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 25px;
+    }
+    .collapsible-content {
+      padding: 8px;
+      margin-top: 5px;
+    }
+    .arrow {
+      font-size: 0.75em;
+    }
+    /* Phrase and Template Manager List */
+    #phraseList, #templateList {
       margin-top: 20px;
     }
     .phrase-item {
@@ -117,24 +137,36 @@
     .phrase-actions button {
       margin-left: 5px;
       background: #4a90e2;
+      border: none;
+      border-radius: 3px;
+      color: white;
+      cursor: pointer;
+      padding: 5px 8px;
+      font-size: 0.9em;
       margin-top: 0;
     }
     .phrase-actions button.delete {
       background: #e74c3c;
     }
-    /* Collapsible section styles */
-    .collapsible-header {
-      cursor: pointer;
-      background: #ddd;
-      padding: 8px;
-      border-radius: 4px;
-      margin-bottom: 0;
+    /* Table layout for composite fields in phrase editor */
+    table.fields-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
     }
-    .collapsible-content {
-      padding: 8px;
-      margin-top: 5px;
+    table.fields-table th,
+    table.fields-table td {
+      border: 1px solid #ccc;
+      padding: 5px 8px;
+      text-align: left;
     }
-    /* Modal styles (for prompting phrase input / export) */
+    table.fields-table th {
+      background: #f0f0f0;
+    }
+    table.fields-table input {
+      margin: 0;
+    }
+    /* Modal styles */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -151,16 +183,21 @@
       background: white;
       padding: 20px;
       border-radius: 8px;
-      max-width: 700px;
+      max-width: 850px;
       width: 90%;
       box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      overflow-y: scroll;
+      max-height: 90%;
+    }
+    /* Make phrase form modal wider */
+    #phraseFormModal .modal {
+      width: 90%;
+      max-width: 90%;
     }
     .modal h3 {
       margin-top: 0;
     }
-    .modal select,
-    .modal input,
-    .modal textarea {
+    .modal input, .modal textarea {
       width: 100%;
       padding: 8px;
       margin-top: 5px;
@@ -170,141 +207,60 @@
       font-size: 1em;
       box-sizing: border-box;
     }
-    .modal button {
+    /* .modal button {
       width: 48%;
-    }
+    } */
     .modal-buttons {
       display: flex;
       justify-content: space-between;
     }
-    /* New Phrase Form styles (in Phrase Manager tab) - in modal */
-    #phraseFormModal .modal {
-      width: 75%;
-      max-width: 75%;
-      height: 93%;
-      padding: 15px 35px;
-      overflow-y: scroll;
-    }
-    #phraseFormContainer {
-      border: 1px solid #ddd;
-      padding: 15px;
-      border-radius: 4px;
-      background: #fff;
-    }
-    #phraseFormContainer h3 {
-      margin-top: 0;
-    }
-    /* Scrollable composite fields container */
-    #compositeFieldsContainer {
-      max-height: 300px;
-      overflow-y: auto;
-      border: 1px solid #ccc;
-      padding: 5px;
-      border-radius: 4px;
-    }
-    /* New styles for composite field rows */
-    .field-row {
-      position: relative;
-      border: 1px solid #ddd;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 4px;
-      transition: border 0.3s;
-    }
-    .field-row:focus-within {
-      border: 2px solid #4a90e2;
-    }
-    .field-row-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #f0f0f0;
-      padding: 5px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .field-row-header span {
-      font-weight: bold;
-    }
-    .field-row-controls button {
-      padding: 5px;
-      font-size: 0.9em;
-      background: #4a90e2;
-      border: none;
-      border-radius: 3px;
-      color: white;
-      cursor: pointer;
-      width: 100px;
-      margin: 5px!important
-    }
-    .field-row-controls button:hover {
-      background: #407ac1;
-    }
-    .field-row-body {
-      margin-top: 10px;
-    }
-
   </style>
   <script src="./phrases.js"></script>
+  <script src="./templates.js"></script>
 </head>
 <body>
   <!-- Tab Navigation -->
   <div id="tabs">
     <button id="narrativeTabBtn" class="active">Narrative</button>
     <button id="phraseTabBtn">Phrases</button>
+    <button id="templateTabBtn">Templates</button>
   </div>
 
   <!-- Narrative Tab -->
   <div id="narrativeTab" class="container-grid active">
     <div class="narrative-container">
-      <textarea id="narrative" placeholder="Type your narrative here...">
-D- {dispatch info}.
-
-C- {complaints}
-
-H- 
-
-A- {arrival}
-
-ABC: {abc}
-NEURO: {neuro}
-HEENT: {heent}
-CV: {cv}
-PULM: {pulm}
-GI/GU/ABD: {abd/gi/gu}
-MS/Ortho/Skin: {ms/ortho/skin}
-SOC/PSYCH: {soc/psych}
-
-During transport Pt remained stable.
-
-R- (Scene) Vitals and an assessment was performed. (Transport) Pt was monitored and vitals were reassessed as needed.
-
-T- Once Pt gave verbal consent to be transported to the hospital the {move to stretcher}. Once the Pt was secured the stretcher was moved out to the ambulance without incident. The stretcher was loaded into the ambulance and secured via an auto-load system. {transport}. Upon arrival to the hospital the stretcher was unloaded and the Pt was taken inside without incident. Once inside, the Pt was registered and taken to {hospital transfer}. At this time a verbal report was given to a nurse and care was transferred.
-
-E- None</textarea>
-      <button style="width: 100%" id="process">Process Narrative</button>
+      <textarea id="narrative" placeholder="Type your narrative here..."></textarea>
+      <button id="process" style="width: 100%;">Process Narrative</button>
     </div>
     <div class="phrases-container">
-      <h2 style="margin-top: 0">Custom Phrases</h2>
+      <h2>Custom Phrases</h2>
       <div id="customPhrases">
-        <!-- Phrase buttons are injected here -->
+        <!-- Phrase buttons will be injected here -->
       </div>
     </div>
   </div>
 
   <!-- Phrase Manager Tab -->
-  <div style="margin-top: 0;" id="phraseManagerTab" class="container">
-    <div style="width:100%;">
-      <h2>Phrase Manager</h2>
-      <button id="createPhraseBtn">Create New Phrase</button>
-      <button id="exportPhraseBtn">Export Phrases</button>
-      <div id="phraseList">
-        <!-- List of phrases with Edit/Delete/Up/Down actions will be shown here -->
-      </div>
+  <div id="phraseManagerTab" class="container">
+    <h2>Phrase Manager</h2>
+    <button id="createPhraseBtn">Create New Phrase</button>
+    <button id="exportPhrasesBtn">Export Phrases</button>
+    <div id="phraseList">
+      <!-- List of phrases with Edit/Delete/Reorder actions will be shown here -->
     </div>
   </div>
 
-  <!-- Modal for Prompting Phrase Input / Export -->
+  <!-- Template Manager Tab -->
+  <div id="templateManagerTab" class="container">
+    <h2>Template Manager</h2>
+    <button id="createTemplateBtn">Create New Template</button>
+    <button id="exportTemplatesBtn">Export Templates</button>
+    <div id="templateList">
+      <!-- List of templates with Use/Edit/Delete/Reorder actions will be shown here -->
+    </div>
+  </div>
+
+  <!-- Modal for Prompting / Editing (Used for Template edits/creates, Phrase insertion, and Export) -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
       <h3 id="modalTitle"></h3>
@@ -322,15 +278,20 @@ E- None</textarea>
       <div id="phraseFormContainer">
         <h3 id="formTitle">Create New Phrase</h3>
         <form id="phraseForm">
+          <!-- Edit Phrase Name and Phrase Template -->
           <div>
             <label>Phrase Name:</label>
             <input type="text" id="phraseName" required />
           </div>
           <div>
+            <label>Phrase Template:</label>
+            <input type="text" id="phraseTemplate" placeholder="Enter phrase template" />
+          </div>
+          <div>
             <label>Composite Phrase?</label>
             <input type="checkbox" id="compositeCheckbox" />
           </div>
-          <!-- New fields for grouping and toggling -->
+          <!-- Grouping and Visibility -->
           <div>
             <label>Section:</label>
             <input type="text" id="phraseSection" placeholder="Optional section name" />
@@ -361,17 +322,25 @@ E- None</textarea>
               <input type="text" id="simpleOptions" />
             </div>
           </div>
-          <!-- Composite phrase fields -->
+          <!-- Composite phrase fields as a table -->
           <div id="compositePhraseFields" style="display:none;">
-            <div id="compositeFieldsContainer">
-              <!-- Field rows will be added here -->
-            </div>
+            <table class="fields-table" id="fieldsTable">
+              <thead>
+                <tr>
+                  <th>Field Name</th>
+                  <th>Field Type</th>
+                  <th>Multiple?</th>
+                  <th>Placeholder</th>
+                  <th>Default</th>
+                  <th>Options</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="fieldsTableBody">
+                <!-- Rows added dynamically -->
+              </tbody>
+            </table>
             <button type="button" id="addFieldButton">Add Field</button>
-            <div style="margin-top:10px;">
-              <label>Insertion Template:</label>
-              <!-- Use placeholders {0}, {1}, etc. -->
-              <input type="text" id="insertionTemplate" placeholder="e.g., A {0} IV was established in the {1}." />
-            </div>
           </div>
           <div style="text-align: right; margin-top:10px;">
             <button type="submit">Save Phrase</button>
@@ -382,46 +351,85 @@ E- None</textarea>
     </div>
   </div>
 
-  <!-- Modal for Exporting Phrases -->
-  <div class="modal-overlay" id="exportModal" style="display:none;">
-    <div class="modal" style="width: 75%;">
-      <h3>Export Phrases</h3>
-      <div id="exportContent"></div>
-      <div class="modal-buttons">
-        <button id="exportCloseBtn">Close</button>
-      </div>
-    </div>
-  </div>
-
   <script>
+    /***** Global Data and Persistence *****/
+    // let predefinedPhrases = {
+    //   "dispatch info": {
+    //     template: "{0} was dispatched for {1}.",
+    //     order: 1000,
+    //     visible: true,
+    //     section: "Pre-Generated"
+    //   },
+    //   "complaints": {
+    //     template: "Pt presents with {0}.",
+    //     order: 2000,
+    //     visible: true,
+    //     section: "Pre-Generated"
+    //   }
+    // };
+    // let narrativeTemplates = {
+    //   "Default Template": {
+    //     content: "D- {dispatch info}.\n\nC- {complaints}\n\nH- \n\nA- {arrival}\n\nABC: {abc}\nNEURO: {neuro}",
+    //     order: 1000
+    //   }
+    // };
+    // function loadPhrases() {
+    //   const stored = localStorage.getItem('predefinedPhrases');
+    //   if (stored) {
+    //     predefinedPhrases = JSON.parse(stored);
+    //   }
+    // }
+    // function savePhrases() {
+    //   localStorage.setItem('predefinedPhrases', JSON.stringify(predefinedPhrases));
+    // }
+    // function loadTemplates() {
+    //   const stored = localStorage.getItem('narrativeTemplates');
+    //   if (stored) {
+    //     narrativeTemplates = JSON.parse(stored);
+    //   }
+    // }
+    // function saveTemplates() {
+    //   localStorage.setItem('narrativeTemplates', JSON.stringify(narrativeTemplates));
+    // }
 
-    /***** Tab Navigation Functions *****/
+    /***** Tab Navigation *****/
     const narrativeTabBtn = document.getElementById("narrativeTabBtn");
     const phraseTabBtn = document.getElementById("phraseTabBtn");
+    const templateTabBtn = document.getElementById("templateTabBtn");
     const narrativeTab = document.getElementById("narrativeTab");
     const phraseManagerTab = document.getElementById("phraseManagerTab");
-
-    narrativeTabBtn.addEventListener("click", () => {
-      narrativeTab.classList.add("active");
-      phraseManagerTab.classList.remove("active");
-      narrativeTabBtn.classList.add("active");
+    const templateManagerTab = document.getElementById("templateManagerTab");
+    function showTab(tab) {
+      narrativeTab.style.display = "none";
+      phraseManagerTab.style.display = "none";
+      templateManagerTab.style.display = "none";
+      narrativeTabBtn.classList.remove("active");
       phraseTabBtn.classList.remove("active");
+      templateTabBtn.classList.remove("active");
+      tab.style.display = (tab.id != "narrativeTab") ? "block" : "grid";
+    }
+    narrativeTabBtn.addEventListener("click", () => {
+      showTab(narrativeTab);
+      narrativeTabBtn.classList.add("active");
     });
     phraseTabBtn.addEventListener("click", () => {
-      phraseManagerTab.classList.add("active");
-      narrativeTab.classList.remove("active");
+      showTab(phraseManagerTab);
       phraseTabBtn.classList.add("active");
-      narrativeTabBtn.classList.remove("active");
       renderPhraseList();
     });
+    templateTabBtn.addEventListener("click", () => {
+      showTab(templateManagerTab);
+      templateTabBtn.classList.add("active");
+      renderTemplateList();
+    });
 
-    /***** Narrative Tab Functions *****/
+    /***** Narrative Functions *****/
     function insertAtCursor(field, value) {
+      field.focus();
       if (document.selection) {
-        field.focus();
         const sel = document.selection.createRange();
         sel.text = value;
-      } else if (field.selectionStart || field.selectionStart === 0) {
+      } else if (typeof field.selectionStart === "number") {
         const startPos = field.selectionStart;
         const endPos = field.selectionEnd;
         field.value = field.value.substring(0, startPos) + value + field.value.substring(endPos);
@@ -432,97 +440,108 @@ E- None</textarea>
       }
       field.focus();
     }
-    // Generate phrase buttons for the Narrative tab.
-    // Only phrases with visible===true are shown. They are grouped by section and sorted by order.
-    function generatePhraseButtons() {
-      const container = document.getElementById("customPhrases");
-      container.innerHTML = "";
-      let phrasesArr = [];
-      for (const key in predefinedPhrases) {
-        const phrase = predefinedPhrases[key];
-        if (phrase.visible === false) continue;
-        phrase.name = key;
-        phrasesArr.push(phrase);
-      }
-      // Group phrases by section.
-      let groups = {};
-      phrasesArr.forEach(phrase => {
-        const section = phrase.section || "Default";
-        if (!groups[section]) groups[section] = [];
-        groups[section].push(phrase);
-      });
-      // For each group, sort by order and create group header and buttons.
-      for (const section in groups) {
-        const groupDiv = document.createElement("div");
-        // Create collapsible header.
-        const header = document.createElement("h3");
-        header.className = "collapsible-header";
-        header.textContent = section;
-        groupDiv.appendChild(header);
-        // Create container for group content.
-        const contentDiv = document.createElement("div");
-        contentDiv.className = "collapsible-content";
-        groups[section].sort((a, b) => (a.order || 0) - (b.order || 0));
-        groups[section].forEach(phrase => {
-          const btn = document.createElement("div");
-          btn.className = "phrase";
-          btn.textContent = `{${phrase.name}}`;
-          btn.addEventListener("click", () => {
-            openPhrasePrompt(phrase.name);
+    document.getElementById("process").addEventListener("click", () => {
+      const narrativeField = document.getElementById("narrative");
+      processNarrativeTokens(narrativeField);
+    });
+
+    /***** Process Narrative Tokens *****/
+    function processNarrativeTokens(narrativeField) {
+      const text = narrativeField.value;
+      const tokenRegex = /{([^}]+)}/g;
+      const tokens = Array.from(text.matchAll(tokenRegex));
+      processNextToken(narrativeField, tokens, 0);
+    }
+    function processNextToken(narrativeField, tokens, index) {
+      if (index >= tokens.length) return;
+      const token = tokens[index];
+      const fullToken = token[0];
+      const key = token[1].trim();
+      const phraseData = predefinedPhrases[key];
+      if (!phraseData) {
+        const value = prompt("Enter value for " + key + ":");
+        narrativeField.value = narrativeField.value.replace(fullToken, value || "");
+        processNextToken(narrativeField, tokens, index + 1);
+      } else {
+        if (phraseData.fields) {
+          askSequentialField(key, phraseData, 0, [], (answers) => {
+            const finalValue = phraseData.template ? formatTemplate(phraseData.template, answers) : answers.join(" ");
+            narrativeField.value = narrativeField.value.replace(fullToken, finalValue);
+            processNextToken(narrativeField, tokens, index + 1);
           });
-          contentDiv.appendChild(btn);
-        });
-        groupDiv.appendChild(contentDiv);
-        // Toggle collapse/expand when header is clicked.
-        header.addEventListener("click", () => {
-          if (contentDiv.style.display === "none") {
-            contentDiv.style.display = "block";
-          } else {
-            contentDiv.style.display = "none";
-          }
-        });
-        // Start with sections expanded.
-        contentDiv.style.display = "block";
-        container.appendChild(groupDiv);
+        } else if (phraseData.type && phraseData.type === "select") {
+          openSimpleSelectPrompt(key, () => {
+            // After selection, re-read tokens and continue processing.
+            processNarrativeTokens(narrativeField);
+          });
+        } else {
+          const value = prompt("Enter value for " + key + ":");
+          narrativeField.value = narrativeField.value.replace(fullToken, value || "");
+          processNextToken(narrativeField, tokens, index + 1);
+        }
       }
     }
-    document.addEventListener("DOMContentLoaded", generatePhraseButtons);
+    function formatTemplate(template, answers) {
+      return template.replace(/{\s*(\d+)\s*}/g, (match, index) => answers[index] || "");
+    }
 
-    /***** Modal for Prompting Phrase Input / Export *****/
-    const modalOverlay = document.getElementById("modalOverlay");
-    const modalTitle = document.getElementById("modalTitle");
-    const modalContent = document.getElementById("modalContent");
-    const modalConfirm = document.getElementById("modalConfirm");
-    const modalCancel = document.getElementById("modalCancel");
-
+    /***** Modal Helper Functions *****/
     function showModal(title, contentElement, confirmCallback) {
+      const modalOverlay = document.getElementById("modalOverlay");
+      const modalTitle = document.getElementById("modalTitle");
+      const modalContent = document.getElementById("modalContent");
+      const modalConfirm = document.getElementById("modalConfirm");
+      const modalCancel = document.getElementById("modalCancel");
       modalTitle.textContent = title;
       modalContent.innerHTML = "";
       modalContent.appendChild(contentElement);
       modalOverlay.style.display = "flex";
-      modalConfirm.style.display = "block";
-      modalCancel.textContent = "Cancel";
-      
       modalConfirm.onclick = function() {
         confirmCallback();
         closeModal();
       };
-      
       modalCancel.onclick = function() {
         closeModal();
       };
     }
     function closeModal() {
-      modalOverlay.style.display = "none";
-      // Reset buttons for standard usage.
-      modalConfirm.style.display = "block";
-      modalCancel.textContent = "Cancel";
+      document.getElementById("modalOverlay").style.display = "none";
+      document.getElementById("modalConfirm").style.display = "block";
     }
-    // Helper to format a template with placeholders {0}, {1}, etc.
-    function formatTemplate(template, answers) {
-      return template.replace(/{\s*(\d+)\s*}/g, (match, index) => answers[index] || "");
+
+    /***** Function for Simple Select Prompt *****/
+    function openSimpleSelectPrompt(key, callback) {
+      const narrativeField = document.getElementById("narrative");
+      const phraseData = predefinedPhrases[key];
+      const container = document.createElement("div");
+      const selectElement = document.createElement("select");
+      if (phraseData.multiple) {
+        selectElement.multiple = true;
+      }
+      if (phraseData.options && phraseData.options.length > 0) {
+        phraseData.options.forEach(option => {
+          const opt = document.createElement("option");
+          opt.value = option;
+          opt.textContent = option;
+          selectElement.appendChild(opt);
+        });
+      } else {
+        selectElement.innerHTML = `<option value="">No options available</option>`;
+      }
+      container.appendChild(selectElement);
+      showModal(`Select value for ${key}`, container, () => {
+        let value;
+        if (selectElement.multiple) {
+          value = Array.from(selectElement.selectedOptions).map(opt => opt.value).join(", ");
+        } else {
+          value = selectElement.value;
+        }
+        insertAtCursor(narrativeField, value);
+        if (callback) callback();
+      });
     }
-    // Sequentially prompt for composite phrase fields with live preview.
+
+    /***** Phrase Insertion Modal for Composite Phrases *****/
     function askSequentialField(key, phraseData, index, answers, finalCallback) {
       if (index >= phraseData.fields.length) {
         finalCallback(answers);
@@ -541,7 +560,9 @@ E- None</textarea>
       let input;
       if (field.type === "select") {
         input = document.createElement("select");
-        if (field.multiple) input.multiple = true;
+        if (field.multiple) {
+          input.multiple = true;
+        }
         field.options.forEach(option => {
           const opt = document.createElement("option");
           opt.value = option;
@@ -580,9 +601,12 @@ E- None</textarea>
           if (i < index) {
             allAnswers.push(answers[i]);
           } else if (i === index) {
-            let current = (input.tagName.toLowerCase() === "select" && input.multiple) ?
-              Array.from(input.selectedOptions).map(opt => opt.value).join(", ") :
-              input.value;
+            let current;
+            if (input.tagName.toLowerCase() === "select" && input.multiple) {
+              current = Array.from(input.selectedOptions).map(opt => opt.value).join(", ");
+            } else {
+              current = input.value;
+            }
             allAnswers.push(current);
           } else {
             allAnswers.push(phraseData.fields[i].default || "");
@@ -591,8 +615,6 @@ E- None</textarea>
         let previewText = "";
         if (phraseData.template) {
           previewText = formatTemplate(phraseData.template, allAnswers);
-        } else if (typeof phraseData.previewTemplate === "function") {
-          previewText = phraseData.previewTemplate(allAnswers);
         } else {
           previewText = allAnswers.join(" ");
         }
@@ -603,15 +625,509 @@ E- None</textarea>
       updatePreview();
       
       showModal(`Enter ${field.label}`, container, () => {
-        let answer = (input.tagName.toLowerCase() === "select" && input.multiple) ?
-          Array.from(input.selectedOptions).map(opt => opt.value).join(", ") :
-          input.value;
+        let answer;
+        if (input.tagName.toLowerCase() === "select" && input.multiple) {
+          answer = Array.from(input.selectedOptions).map(opt => opt.value).join(", ");
+        } else {
+          answer = input.value;
+        }
         answers.push(answer);
         setTimeout(() => {
           askSequentialField(key, phraseData, index + 1, answers, finalCallback);
         }, 100);
       });
     }
+
+    /***** Generate Phrase Buttons in Narrative Tab *****/
+    function generatePhraseButtons() {
+      const container = document.getElementById("customPhrases");
+      container.innerHTML = "";
+      let phrasesArr = [];
+      for (const key in predefinedPhrases) {
+        const phrase = predefinedPhrases[key];
+        if (phrase.visible === false) continue;
+        phrase.name = key;
+        phrasesArr.push(phrase);
+      }
+      // Group phrases by section.
+      let groups = {};
+      phrasesArr.forEach(phrase => {
+        const section = phrase.section || "Default";
+        if (!groups[section]) groups[section] = [];
+        groups[section].push(phrase);
+      });
+      for (const section in groups) {
+        const groupDiv = document.createElement("div");
+        const header = document.createElement("h3");
+        header.className = "collapsible-header";
+        header.innerHTML = `<span class="section-title">${section}</span><span class="arrow">&#x25BC;</span>`;
+        groupDiv.appendChild(header);
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "collapsible-content";
+        contentDiv.style.display = "block";
+        groups[section].sort((a, b) => (a.order || 0) - (b.order || 0));
+        groups[section].forEach(phrase => {
+          const btn = document.createElement("div");
+          btn.className = "phrase";
+          btn.textContent = `{${phrase.name}}`;
+          btn.addEventListener("click", () => {
+            if (phrase.fields) {
+              openPhrasePrompt(phrase.name);
+            } else if (phrase.type && phrase.type === "select") {
+              openSimpleSelectPrompt(phrase.name);
+            } else {
+              let value = prompt("Enter value for " + phrase.name + ":");
+              if (value !== null) {
+                insertAtCursor(document.getElementById("narrative"), value);
+              }
+            }
+          });
+          contentDiv.appendChild(btn);
+        });
+        header.addEventListener("click", () => {
+          let currentDisplay = window.getComputedStyle(contentDiv).display;
+          if (currentDisplay === "none") {
+            contentDiv.style.display = "block";
+            header.querySelector(".arrow").innerHTML = "&#x25BC;";
+          } else {
+            contentDiv.style.display = "none";
+            header.querySelector(".arrow").innerHTML = "&#x25B2;";
+          }
+        });
+        groupDiv.appendChild(contentDiv);
+        container.appendChild(groupDiv);
+      }
+    }
+
+    /***** Phrase Manager Functions *****/
+    function renderPhraseList() {
+      const phraseList = document.getElementById("phraseList");
+      phraseList.innerHTML = "";
+      let phrasesArr = [];
+      for (const key in predefinedPhrases) {
+        let ph = predefinedPhrases[key];
+        ph.name = key;
+        phrasesArr.push(ph);
+      }
+      // Group by section.
+      let groups = {};
+      phrasesArr.forEach(ph => {
+        const sec = ph.section || "Default";
+        if (!groups[sec]) groups[sec] = [];
+        groups[sec].push(ph);
+      });
+      for (const sec in groups) {
+        const groupDiv = document.createElement("div");
+        const header = document.createElement("h3");
+        header.innerHTML = `<span class="section-title">${sec}</span><span class="arrow">&#x25BC;</span>`;
+        header.className = "collapsible-header";
+        groupDiv.appendChild(header);
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "collapsible-content";
+        contentDiv.style.display = "block";
+        groups[sec].sort((a, b) => (a.order || 0) - (b.order || 0));
+        groups[sec].forEach(ph => {
+          const row = document.createElement("div");
+          row.className = "phrase-item";
+          row.innerHTML = `<span>${ph.name}</span>`;
+          const actions = document.createElement("div");
+          actions.className = "phrase-actions";
+          const upBtn = document.createElement("button");
+          upBtn.innerHTML = "&#x25B2;";
+          upBtn.title = "Move Up";
+          upBtn.addEventListener("click", () => movePhrase(ph.name, -1));
+          const downBtn = document.createElement("button");
+          downBtn.innerHTML = "&#x25BC;";
+          downBtn.title = "Move Down";
+          downBtn.addEventListener("click", () => movePhrase(ph.name, 1));
+          const editBtn = document.createElement("button");
+          editBtn.textContent = "Edit";
+          editBtn.addEventListener("click", () => loadPhraseForEditing(ph.name));
+          const deleteBtn = document.createElement("button");
+          deleteBtn.textContent = "Delete";
+          deleteBtn.className = "delete";
+          deleteBtn.addEventListener("click", () => {
+            if (confirm(`Delete phrase "${ph.name}"?`)) {
+              delete predefinedPhrases[ph.name];
+              // savePhrases();
+              renderPhraseList();
+              generatePhraseButtons();
+            }
+          });
+          actions.appendChild(upBtn);
+          actions.appendChild(downBtn);
+          actions.appendChild(editBtn);
+          actions.appendChild(deleteBtn);
+          row.appendChild(actions);
+          contentDiv.appendChild(row);
+        });
+        header.addEventListener("click", () => {
+          let currentDisplay = window.getComputedStyle(contentDiv).display;
+          if (currentDisplay === "none") {
+            contentDiv.style.display = "block";
+            header.querySelector(".arrow").innerHTML = "&#x25BC;";
+          } else {
+            contentDiv.style.display = "none";
+            header.querySelector(".arrow").innerHTML = "&#x25B2;";
+          }
+        });
+        groupDiv.appendChild(contentDiv);
+        phraseList.appendChild(groupDiv);
+      }
+    }
+    function movePhrase(key, delta) {
+      let ph = predefinedPhrases[key];
+      if (!ph) return;
+      const sec = ph.section || "Default";
+      let arr = [];
+      for (const k in predefinedPhrases) {
+        let p = predefinedPhrases[k];
+        if ((p.section || "Default") === sec) {
+          p.name = k;
+          arr.push(p);
+        }
+      }
+      arr.sort((a, b) => (a.order || 0) - (b.order || 0));
+      const idx = arr.findIndex(p => p.name === key);
+      if (idx === -1) return;
+      const newIndex = idx + delta;
+      if (newIndex < 0 || newIndex >= arr.length) return;
+      let temp = arr[idx].order;
+      arr[idx].order = arr[newIndex].order;
+      arr[newIndex].order = temp;
+      predefinedPhrases[arr[idx].name].order = arr[idx].order;
+      predefinedPhrases[arr[newIndex].name].order = arr[newIndex].order;
+      // savePhrases();
+      renderPhraseList();
+      generatePhraseButtons();
+    }
+    function loadPhraseForEditing(key) {
+      window.editingPhraseKey = key;
+      document.getElementById("formTitle").textContent = "Edit Phrase: " + key;
+      const phrase = predefinedPhrases[key];
+      document.getElementById("phraseName").value = key;
+      document.getElementById("phraseTemplate").value = phrase.template || "";
+      document.getElementById("phraseSection").value = phrase.section || "";
+      document.getElementById("phraseVisible").checked = phrase.visible !== false;
+      if (phrase.fields) {
+        document.getElementById("compositeCheckbox").checked = true;
+        document.getElementById("simplePhraseFields").style.display = "none";
+        document.getElementById("compositePhraseFields").style.display = "block";
+        document.getElementById("fieldsTableBody").innerHTML = "";
+        phrase.fields.forEach(field => {
+          addCompositeFieldRow(field);
+        });
+      } else {
+        document.getElementById("compositeCheckbox").checked = false;
+        document.getElementById("simplePhraseFields").style.display = "block";
+        document.getElementById("compositePhraseFields").style.display = "none";
+        document.getElementById("simpleFieldType").value = phrase.type;
+        document.getElementById("simplePlaceholder").value = phrase.placeholder || "";
+        document.getElementById("simpleDefault").value = phrase.default || "";
+        if (phrase.type === "select") {
+          document.getElementById("simpleOptions").value = phrase.options ? phrase.options.join(", ") : "";
+          document.getElementById("simpleOptionsContainer").style.display = "block";
+        } else {
+          document.getElementById("simpleOptionsContainer").style.display = "none";
+        }
+      }
+      document.getElementById("phraseFormModal").style.display = "flex";
+    }
+    document.getElementById("createPhraseBtn").addEventListener("click", () => {
+      window.editingPhraseKey = null;
+      document.getElementById("formTitle").textContent = "Create New Phrase";
+      document.getElementById("phraseForm").reset();
+      document.getElementById("simplePhraseFields").style.display = "block";
+      document.getElementById("compositePhraseFields").style.display = "none";
+      document.getElementById("phraseFormModal").style.display = "flex";
+    });
+
+    /***** Hide/Show Options *****/
+    document.getElementById("simpleFieldType").addEventListener("change", () => {
+      if (document.getElementById("simpleFieldType").value === "select") {
+        document.getElementById("simpleOptionsContainer").style.display = "block";
+        document.getElementById("simpleDefault").parentElement.style.display = "none";
+        document.getElementById("simplePlaceholder").parentElement.style.display = "none";
+      } else {
+        document.getElementById("simpleOptionsContainer").style.display = "none";
+        document.getElementById("simpleDefault").parentElement.style.display = "block";
+        document.getElementById("simplePlaceholder").parentElement.style.display = "block";
+      }
+    })
+
+    /***** Composite Fields Table Functions *****/
+    function addCompositeFieldRow(rowData) {
+      const tbody = document.getElementById("fieldsTableBody");
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input type="text" class="field-label" value="${rowData && rowData.label ? rowData.label : ''}" /></td>
+        <td>
+          <select class="field-type">
+            <option value="input">Input</option>
+            <option value="select">Select</option>
+          </select>
+        </td>
+        <td><input type="checkbox" class="field-multiple" ${rowData && rowData.multiple ? "checked" : ""} /></td>
+        <td><input type="text" class="field-placeholder" value="${rowData && rowData.placeholder ? rowData.placeholder : ''}" /></td>
+        <td><input type="text" class="field-default" value="${rowData && rowData.default ? rowData.default : ''}" /></td>
+        <td><input type="text" class="field-options" value="${rowData && rowData.options ? rowData.options.join(", ") : ''}" /></td>
+        <td>
+          <button type="button" class="move-up" title="Move Up">&#x25B2;</button>
+          <button type="button" class="move-down" title="Move Down">&#x25BC;</button>
+          <button type="button" class="remove-field">Remove</button>
+        </td>
+      `;
+      if (rowData && rowData.type) {
+        tr.querySelector(".field-type").value = rowData.type;
+      }
+      tr.querySelector(".move-up").addEventListener("click", () => {
+        let prev = tr.previousElementSibling;
+        if (prev) {
+          tr.parentElement.insertBefore(tr, prev);
+        }
+      });
+      tr.querySelector(".move-down").addEventListener("click", () => {
+        let next = tr.nextElementSibling;
+        if (next) {
+          tr.parentElement.insertBefore(next, tr);
+        }
+      });
+      tr.querySelector(".remove-field").addEventListener("click", () => {
+        tbody.removeChild(tr);
+      });
+      tbody.appendChild(tr);
+    }
+    document.getElementById("addFieldButton").addEventListener("click", () => {
+      addCompositeFieldRow();
+    });
+    document.getElementById("cancelPhraseBtn").addEventListener("click", () => {
+      document.getElementById("phraseFormModal").style.display = "none";
+    });
+    document.getElementById("phraseForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("phraseName").value.trim();
+      if (!name) return;
+      const phraseTemplate = document.getElementById("phraseTemplate").value.trim();
+      let newPhrase;
+      if (!document.getElementById("compositeCheckbox").checked) {
+        const type = document.getElementById("simpleFieldType").value;
+        const placeholder = document.getElementById("simplePlaceholder").value;
+        const def = document.getElementById("simpleDefault").value;
+        if (type === "select") {
+          const options = document.getElementById("simpleOptions").value.split(",").map(s => s.trim()).filter(s => s);
+          newPhrase = { type, placeholder, default: def, options };
+        } else {
+          newPhrase = { type, placeholder, default: def };
+        }
+        newPhrase.template = phraseTemplate;
+      } else {
+        const fields = [];
+        const tbody = document.getElementById("fieldsTableBody");
+        const rows = tbody.querySelectorAll("tr");
+        rows.forEach(row => {
+          const label = row.querySelector(".field-label").value.trim();
+          if (!label) return;
+          const type = row.querySelector(".field-type").value;
+          const placeholder = row.querySelector(".field-placeholder").value;
+          const def = row.querySelector(".field-default").value;
+          const multiple = row.querySelector(".field-multiple").checked;
+          let fieldObj = { label, type, placeholder, default: def };
+          if (type === "select") {
+            const options = row.querySelector(".field-options").value.split(",").map(s => s.trim()).filter(s => s);
+            fieldObj.options = options;
+            fieldObj.multiple = multiple;
+          }
+          fields.push(fieldObj);
+        });
+        newPhrase = { fields, template: phraseTemplate };
+      }
+      const section = document.getElementById("phraseSection").value.trim();
+      const visible = document.getElementById("phraseVisible").checked;
+      newPhrase.section = section;
+      newPhrase.visible = visible;
+      if (!window.editingPhraseKey) {
+        newPhrase.order = Date.now();
+      } else {
+        newPhrase.order = predefinedPhrases[window.editingPhraseKey].order || Date.now();
+      }
+      if (window.editingPhraseKey && window.editingPhraseKey !== name) {
+        delete predefinedPhrases[window.editingPhraseKey];
+      }
+      predefinedPhrases[name] = newPhrase;
+      // savePhrases();
+      renderPhraseList();
+      generatePhraseButtons();
+      document.getElementById("phraseFormModal").style.display = "none";
+      document.getElementById("phraseForm").reset();
+      document.getElementById("fieldsTableBody").innerHTML = "";
+    });
+
+    /***** Template Manager Functions *****/
+    function renderTemplateList() {
+      const templateList = document.getElementById("templateList");
+      templateList.innerHTML = "";
+      let templatesArr = [];
+      for (const key in narrativeTemplates) {
+        let tpl = narrativeTemplates[key];
+        tpl.name = key;
+        templatesArr.push(tpl);
+      }
+      templatesArr.sort((a, b) => (a.order || 0) - (b.order || 0));
+      templatesArr.forEach(tpl => {
+        const row = document.createElement("div");
+        row.className = "phrase-item";
+        row.innerHTML = `<span>${tpl.name}</span>`;
+        const actions = document.createElement("div");
+        actions.className = "phrase-actions";
+        const upBtn = document.createElement("button");
+        upBtn.innerHTML = "&#x25B2;";
+        upBtn.title = "Move Up";
+        upBtn.addEventListener("click", () => moveTemplate(tpl.name, -1));
+        const downBtn = document.createElement("button");
+        downBtn.innerHTML = "&#x25BC;";
+        downBtn.title = "Move Down";
+        downBtn.addEventListener("click", () => moveTemplate(tpl.name, 1));
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+        editBtn.addEventListener("click", () => showTemplateEditModal(tpl.name));
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.className = "delete";
+        deleteBtn.addEventListener("click", () => {
+          if (confirm(`Delete template "${tpl.name}"?`)) {
+            delete narrativeTemplates[tpl.name];
+            // saveTemplates();
+            renderTemplateList();
+          }
+        });
+        const useBtn = document.createElement("button");
+        useBtn.textContent = "Use Template";
+        useBtn.addEventListener("click", () => {
+          const narrativeField = document.getElementById("narrative");
+          narrativeField.value = tpl.content;
+          narrativeTabBtn.click();
+        });
+        actions.appendChild(upBtn);
+        actions.appendChild(downBtn);
+        actions.appendChild(editBtn);
+        actions.appendChild(deleteBtn);
+        actions.appendChild(useBtn);
+        row.appendChild(actions);
+        templateList.appendChild(row);
+      });
+    }
+    function moveTemplate(key, delta) {
+      let tpl = narrativeTemplates[key];
+      if (!tpl) return;
+      let arr = [];
+      for (const k in narrativeTemplates) {
+        let t = narrativeTemplates[k];
+        t.name = k;
+        arr.push(t);
+      }
+      arr.sort((a, b) => (a.order || 0) - (b.order || 0));
+      const idx = arr.findIndex(t => t.name === key);
+      if (idx === -1) return;
+      const newIndex = idx + delta;
+      if (newIndex < 0 || newIndex >= arr.length) return;
+      let temp = arr[idx].order;
+      arr[idx].order = arr[newIndex].order;
+      arr[newIndex].order = temp;
+      narrativeTemplates[arr[idx].name].order = arr[idx].order;
+      narrativeTemplates[arr[newIndex].name].order = arr[newIndex].order;
+      // saveTemplates();
+      renderTemplateList();
+    }
+    function showTemplateEditModal(key) {
+      const tpl = narrativeTemplates[key];
+      const modalTitle = document.getElementById("modalTitle");
+      const modalContent = document.getElementById("modalContent");
+      modalTitle.textContent = "Edit Template";
+      modalContent.innerHTML = `
+        <label>Template Name:</label>
+        <input type="text" id="templateNameEdit" value="${key}" />
+        <label>Template Content:</label>
+        <textarea id="templateContentEdit" rows="6" style="height: 500px">${tpl.content}</textarea>
+      `;
+      document.getElementById("modalConfirm").onclick = function() {
+        const newName = document.getElementById("templateNameEdit").value.trim();
+        const newContent = document.getElementById("templateContentEdit").value;
+        if (!newName) return;
+        let order = tpl.order;
+        delete narrativeTemplates[key];
+        narrativeTemplates[newName] = { content: newContent, order: order };
+        // saveTemplates();
+        renderTemplateList();
+        closeModal();
+      };
+      document.getElementById("modalCancel").onclick = closeModal;
+      document.getElementById("modalOverlay").style.display = "flex";
+    }
+    function showTemplateCreateModal() {
+      const modalTitle = document.getElementById("modalTitle");
+      const modalContent = document.getElementById("modalContent");
+      modalTitle.textContent = "Create Template";
+      modalContent.innerHTML = `
+        <label>Template Name:</label>
+        <input type="text" id="templateNameCreate" placeholder="Template Name" />
+        <label>Template Content:</label>
+        <textarea id="templateContentCreate" rows="6" placeholder="Template Content"></textarea>
+      `;
+      document.getElementById("modalConfirm").onclick = function() {
+        const newName = document.getElementById("templateNameCreate").value.trim();
+        const newContent = document.getElementById("templateContentCreate").value;
+        if (!newName) return;
+        narrativeTemplates[newName] = { content: newContent, order: Date.now() };
+        // saveTemplates();
+        renderTemplateList();
+        closeModal();
+      };
+      document.getElementById("modalCancel").onclick = closeModal;
+      document.getElementById("modalOverlay").style.display = "flex";
+    }
+    document.getElementById("createTemplateBtn").addEventListener("click", () => {
+      showTemplateCreateModal();
+    });
+
+    /***** Export Functions *****/
+    function exportPhrases() {
+      const exportStr = JSON.stringify(predefinedPhrases, null, 2);
+      const container = document.createElement("div");
+      const textarea = document.createElement("textarea");
+      textarea.value = exportStr;
+      textarea.style.width = "100%";
+      textarea.style.height = "200px";
+      textarea.readOnly = true;
+      container.appendChild(textarea);
+      showModal("Export Phrases", container, () => {});
+      document.getElementById("modalConfirm").style.display = "none";
+    }
+    function exportTemplates() {
+      const exportStr = JSON.stringify(narrativeTemplates, null, 2);
+      const container = document.createElement("div");
+      const textarea = document.createElement("textarea");
+      textarea.value = exportStr;
+      textarea.style.width = "100%";
+      textarea.style.height = "200px";
+      textarea.readOnly = true;
+      container.appendChild(textarea);
+      showModal("Export Templates", container, () => {});
+      document.getElementById("modalConfirm").style.display = "none";
+    }
+    document.getElementById("exportPhrasesBtn").addEventListener("click", exportPhrases);
+    document.getElementById("exportTemplatesBtn").addEventListener("click", exportTemplates);
+
+    /***** Immediate Toggle for Composite Checkbox *****/
+    document.getElementById("compositeCheckbox").addEventListener("change", function() {
+      if (this.checked) {
+        document.getElementById("simplePhraseFields").style.display = "none";
+        document.getElementById("compositePhraseFields").style.display = "block";
+      } else {
+        document.getElementById("simplePhraseFields").style.display = "block";
+        document.getElementById("compositePhraseFields").style.display = "none";
+      }
+    });
+
     function openPhrasePrompt(key) {
       const narrativeField = document.getElementById("narrative");
       const phraseData = predefinedPhrases[key];
@@ -663,476 +1179,12 @@ E- None</textarea>
         });
       }
     }
-    const tokenRegex = /{([^}]+)}/g;
-    let tokensFound = [];
-    let currentTokenIndex = 0;
-    document.getElementById("process").addEventListener("click", () => {
-      const narrativeField = document.getElementById("narrative");
-      const text = narrativeField.value;
-      tokensFound = [...text.matchAll(tokenRegex)];
-      currentTokenIndex = 0;
-      processNextToken(narrativeField);
-    });
-    function processNextToken(narrativeField) {
-      if (currentTokenIndex >= tokensFound.length) return;
-      const tokenMatch = tokensFound[currentTokenIndex];
-      const fullMatch = tokenMatch[0];
-      const key = tokenMatch[1].trim();
-      const phraseData = predefinedPhrases[key];
-      if (phraseData) {
-        if (phraseData.fields) {
-          askSequentialField(key, phraseData, 0, [], (answers) => {
-            let finalValue = "";
-            if (phraseData.template) {
-              finalValue = formatTemplate(phraseData.template, answers);
-            } else if (typeof phraseData.previewTemplate === "function") {
-              finalValue = phraseData.previewTemplate(answers);
-            } else {
-              finalValue = answers.join(" ");
-            }
-            narrativeField.value = narrativeField.value.replace(fullMatch, finalValue);
-            currentTokenIndex++;
-            processNextToken(narrativeField);
-          });
-        } else if (phraseData.type === "select") {
-          const inputElement = document.createElement("select");
-          if (phraseData.multiple) inputElement.multiple = true;
-          phraseData.options.forEach(option => {
-            const opt = document.createElement("option");
-            opt.value = option;
-            opt.textContent = option;
-            inputElement.appendChild(opt);
-          });
-          if (phraseData.default) {
-            inputElement.value = phraseData.default;
-          }
-          showModal(`Enter value for ${key}`, inputElement, () => {
-            let selectedValue = (phraseData.multiple) ?
-              Array.from(inputElement.selectedOptions).map(opt => opt.value).join(", ") :
-              inputElement.value;
-            narrativeField.value = narrativeField.value.replace(fullMatch, selectedValue);
-            currentTokenIndex++;
-            processNextToken(narrativeField);
-          });
-        } else {
-          const inputElement = document.createElement("input");
-          inputElement.type = "text";
-          inputElement.placeholder = phraseData.placeholder || "";
-          if (phraseData.default) inputElement.value = phraseData.default;
-          showModal(`Enter value for ${key}`, inputElement, () => {
-            const value = inputElement.value;
-            narrativeField.value = narrativeField.value.replace(fullMatch, value);
-            currentTokenIndex++;
-            processNextToken(narrativeField);
-          });
-        }
-      } else {
-        const userInput = prompt(`Enter value for ${key}:`);
-        narrativeField.value = narrativeField.value.replace(fullMatch, userInput || "");
-        currentTokenIndex++;
-        processNextToken(narrativeField);
-      }
-    }
 
-    /***** Phrase Manager Functions *****/
-    const phraseList = document.getElementById("phraseList");
-    const createPhraseBtn = document.getElementById("createPhraseBtn");
-    const exportPhraseBtn = document.getElementById("exportPhraseBtn");
-    const phraseFormModal = document.getElementById("phraseFormModal");
-    const phraseFormContainer = document.getElementById("phraseFormContainer");
-    const phraseForm = document.getElementById("phraseForm");
-    const phraseNameInput = document.getElementById("phraseName");
-    const compositeCheckbox = document.getElementById("compositeCheckbox");
-    const simplePhraseFields = document.getElementById("simplePhraseFields");
-    const compositePhraseFields = document.getElementById("compositePhraseFields");
-    const simpleFieldType = document.getElementById("simpleFieldType");
-    const simpleOptionsContainer = document.getElementById("simpleOptionsContainer");
-    const addFieldButton = document.getElementById("addFieldButton");
-    const compositeFieldsContainer = document.getElementById("compositeFieldsContainer");
-    const cancelPhraseBtn = document.getElementById("cancelPhraseBtn");
-    const formTitle = document.getElementById("formTitle");
-    const insertionTemplateInput = document.getElementById("insertionTemplate");
-    const phraseSectionInput = document.getElementById("phraseSection");
-    const phraseVisibleInput = document.getElementById("phraseVisible");
-
-    let editingPhraseKey = null; // null when creating new phrase
-
-    function showPhraseFormModal() {
-      phraseFormModal.style.display = "flex";
-    }
-    function hidePhraseFormModal() {
-      phraseFormModal.style.display = "none";
-    }
-
-    compositeCheckbox.addEventListener("change", () => {
-      if (compositeCheckbox.checked) {
-        simplePhraseFields.style.display = "none";
-        compositePhraseFields.style.display = "block";
-        compositeFieldsContainer.innerHTML = "";
-        addCompositeFieldRow();
-      } else {
-        simplePhraseFields.style.display = "block";
-        compositePhraseFields.style.display = "none";
-      }
-    });
-    simpleFieldType.addEventListener("change", () => {
-      if (simpleFieldType.value === "select") {
-        simpleOptionsContainer.style.display = "block";
-      } else {
-        simpleOptionsContainer.style.display = "none";
-      }
-    });
-    function addCompositeFieldRow() {
-      const row = document.createElement("div");
-      row.className = "field-row";
-      row.innerHTML = `
-        <div class="field-row-header">
-          <span class="field-title">New Field</span>
-          <div class="field-row-controls">
-            <button type="button" class="toggle-field">Toggle</button>
-            <button type="button" class="move-up">Up</button>
-            <button type="button" class="move-down">Down</button>
-            <button type="button" class="remove-field">Remove Field</button>
-          </div>
-        </div>
-        <div class="field-row-body">
-          <div>
-            <label>Field Label:</label>
-            <input type="text" class="field-label" required />
-          </div>
-          <div>
-            <label>Field Type:</label>
-            <select class="field-type">
-              <option value="input">Input</option>
-              <option value="select">Select</option>
-            </select>
-          </div>
-          <div class="field-multiple-container" style="display:none;">
-            <label>Multiple Select?</label>
-            <input type="checkbox" class="field-multiple" />
-          </div>
-          <div>
-            <label>Placeholder:</label>
-            <input type="text" class="field-placeholder" />
-          </div>
-          <div>
-            <label>Default Value:</label>
-            <input type="text" class="field-default" />
-          </div>
-          <div class="field-options-container" style="display:none;">
-            <label>Options (comma separated):</label>
-            <input type="text" class="field-options" />
-          </div>
-        </div>
-      `;
-      // Toggle collapse/expand for the field row.
-      row.querySelector(".toggle-field").addEventListener("click", () => {
-        const body = row.querySelector(".field-row-body");
-        body.style.display = (body.style.display === "none") ? "block" : "none";
-      });
-      // Move up functionality.
-      row.querySelector(".move-up").addEventListener("click", () => {
-        if(row.previousElementSibling) {
-          row.parentElement.insertBefore(row, row.previousElementSibling);
-        }
-      });
-      // Move down functionality.
-      row.querySelector(".move-down").addEventListener("click", () => {
-        if(row.nextElementSibling) {
-          row.parentElement.insertBefore(row.nextElementSibling, row);
-        }
-      });
-      // Remove field.
-      row.querySelector(".remove-field").addEventListener("click", () => {
-        compositeFieldsContainer.removeChild(row);
-      });
-      compositeFieldsContainer.appendChild(row);
-    }
-    addFieldButton.addEventListener("click", addCompositeFieldRow);
-
-    createPhraseBtn.addEventListener("click", () => {
-      editingPhraseKey = null;
-      formTitle.textContent = "Create New Phrase";
-      phraseForm.reset();
-      simplePhraseFields.style.display = "block";
-      compositePhraseFields.style.display = "none";
-      showPhraseFormModal();
-    });
-    cancelPhraseBtn.addEventListener("click", () => {
-      hidePhraseFormModal();
-    });
-    exportPhraseBtn.addEventListener("click", () => {
-      const exportText = "const predefinedPhrases = " + JSON.stringify(predefinedPhrases, null, 2) + ";";
-      const textArea = document.createElement("textarea");
-      textArea.style.width = "100%";
-      textArea.style.height = "200px";
-      textArea.value = exportText;
-      modalConfirm.style.display = "none";
-      modalCancel.textContent = "Close";
-      showModal("Export Phrases", textArea, () => {});
-    });
-    function renderPhraseList() {
-      phraseList.innerHTML = "";
-      let phrasesArr = [];
-      for (const key in predefinedPhrases) {
-        const ph = predefinedPhrases[key];
-        ph.name = key;
-        phrasesArr.push(ph);
-      }
-      // Group by section.
-      let groups = {};
-      phrasesArr.forEach(ph => {
-        const sec = ph.section || "Default";
-        if (!groups[sec]) groups[sec] = [];
-        groups[sec].push(ph);
-      });
-      for (const sec in groups) {
-        const groupDiv = document.createElement("div");
-        const header = document.createElement("h3");
-        header.textContent = sec;
-        header.className = "collapsible-header";
-        groupDiv.appendChild(header);
-        const contentDiv = document.createElement("div");
-        contentDiv.className = "collapsible-content";
-        groups[sec].sort((a, b) => (a.order || 0) - (b.order || 0));
-        groups[sec].forEach(ph => {
-          const item = document.createElement("div");
-          item.className = "phrase-item";
-          const span = document.createElement("span");
-          span.textContent = ph.name;
-          item.appendChild(span);
-          const actions = document.createElement("div");
-          actions.className = "phrase-actions";
-          const upBtn = document.createElement("button");
-          upBtn.textContent = "Up";
-          upBtn.addEventListener("click", () => { movePhrase(ph.name, -1); });
-          const downBtn = document.createElement("button");
-          downBtn.textContent = "Down";
-          downBtn.addEventListener("click", () => { movePhrase(ph.name, 1); });
-          const editBtn = document.createElement("button");
-          editBtn.textContent = "Edit";
-          editBtn.addEventListener("click", () => {
-            loadPhraseForEditing(ph.name);
-          });
-          const deleteBtn = document.createElement("button");
-          deleteBtn.textContent = "Delete";
-          deleteBtn.className = "delete";
-          deleteBtn.addEventListener("click", () => {
-            if (confirm(`Delete phrase "${ph.name}"?`)) {
-              delete predefinedPhrases[ph.name];
-              renderPhraseList();
-              generatePhraseButtons();
-            }
-          });
-          actions.appendChild(upBtn);
-          actions.appendChild(downBtn);
-          actions.appendChild(editBtn);
-          actions.appendChild(deleteBtn);
-          item.appendChild(actions);
-          contentDiv.appendChild(item);
-        });
-        // Start with sections expanded.
-        contentDiv.style.display = "block";
-        // Toggle collapse/expand on header click.
-        header.addEventListener("click", () => {
-          if (contentDiv.style.display === "none") {
-            contentDiv.style.display = "block";
-          } else {
-            contentDiv.style.display = "none";
-          }
-        });
-        groupDiv.appendChild(contentDiv);
-        phraseList.appendChild(groupDiv);
-      }
-    }
-    function movePhrase(key, delta) {
-      const ph = predefinedPhrases[key];
-      if (!ph) return;
-      const sec = ph.section || "Default";
-      let arr = [];
-      for (const k in predefinedPhrases) {
-        const p = predefinedPhrases[k];
-        if ((p.section || "Default") === sec) {
-          p.name = k;
-          arr.push(p);
-        }
-      }
-      arr.sort((a, b) => (a.order || 0) - (b.order || 0));
-      const idx = arr.findIndex(p => p.name === key);
-      if (idx === -1) return;
-      const newIndex = idx + delta;
-      if (newIndex < 0 || newIndex >= arr.length) return;
-      const temp = arr[idx].order;
-      arr[idx].order = arr[newIndex].order;
-      arr[newIndex].order = temp;
-      predefinedPhrases[arr[idx].name].order = arr[idx].order;
-      predefinedPhrases[arr[newIndex].name].order = arr[newIndex].order;
-      renderPhraseList();
+    /***** Initialization *****/
+    document.addEventListener("DOMContentLoaded", () => {
+      // loadPhrases();
+      // loadTemplates();
       generatePhraseButtons();
-    }
-    function loadPhraseForEditing(key) {
-      editingPhraseKey = key;
-      formTitle.textContent = "Edit Phrase: " + key;
-      const phrase = predefinedPhrases[key];
-      phraseNameInput.value = key;
-      // Load Section and Visible.
-      phraseSectionInput.value = phrase.section || "";
-      phraseVisibleInput.checked = phrase.visible !== false;
-      if (phrase.fields) {
-        compositeCheckbox.checked = true;
-        simplePhraseFields.style.display = "none";
-        compositePhraseFields.style.display = "block";
-        compositeFieldsContainer.innerHTML = "";
-        phrase.fields.forEach(field => {
-          const row = document.createElement("div");
-          row.className = "field-row";
-          row.innerHTML = `
-            <div class="field-row-header">
-              <span class="field-title">${field.label || 'New Field'}</span>
-              <div class="field-row-controls">
-                <button type="button" class="toggle-field">Toggle</button>
-                <button type="button" class="move-up">Up</button>
-                <button type="button" class="move-down">Down</button>
-                <button type="button" class="remove-field">Remove Field</button>
-              </div>
-            </div>
-            <div class="field-row-body" style="display:none">
-              <div>
-                <label>Field Label:</label>
-                <input type="text" class="field-label" required value="${field.label}" />
-              </div>
-              <div>
-                <label>Field Type:</label>
-                <select class="field-type">
-                  <option value="input">Input</option>
-                  <option value="select">Select</option>
-                </select>
-              </div>
-              <div class="field-multiple-container" style="display:none;">
-                <label>Multiple Select?</label>
-                <input type="checkbox" class="field-multiple" ${field.multiple ? "checked" : ""} />
-              </div>
-              <div>
-                <label>Placeholder:</label>
-                <input type="text" class="field-placeholder" value="${field.placeholder || ""}" />
-              </div>
-              <div>
-                <label>Default Value:</label>
-                <input type="text" class="field-default" value="${field.default || ""}" />
-              </div>
-              <div class="field-options-container" style="display:none;">
-                <label>Options (comma separated):</label>
-                <input type="text" class="field-options" value="${field.options ? field.options.join(", ") : ""}" />
-              </div>
-            </div>
-          `;
-          // Set the field type value.
-          const fieldTypeSelect = row.querySelector(".field-type");
-          fieldTypeSelect.value = field.type;
-          const optionsContainer = row.querySelector(".field-options-container");
-          const multipleContainer = row.querySelector(".field-multiple-container");
-          if (field.type === "select") {
-            optionsContainer.style.display = "block";
-            multipleContainer.style.display = "block";
-          }
-          // Toggle collapse/expand.
-          row.querySelector(".toggle-field").addEventListener("click", () => {
-            const body = row.querySelector(".field-row-body");
-            body.style.display = (body.style.display === "none") ? "block" : "none";
-          });
-          // Move up.
-          row.querySelector(".move-up").addEventListener("click", () => {
-            if(row.previousElementSibling) {
-              row.parentElement.insertBefore(row, row.previousElementSibling);
-            }
-          });
-          // Move down.
-          row.querySelector(".move-down").addEventListener("click", () => {
-            if(row.nextElementSibling) {
-              row.parentElement.insertBefore(row.nextElementSibling, row);
-            }
-          });
-          // Remove field.
-          row.querySelector(".remove-field").addEventListener("click", () => {
-            compositeFieldsContainer.removeChild(row);
-          });
-          compositeFieldsContainer.appendChild(row);
-        });
-        insertionTemplateInput.value = phrase.template || "";
-      } else {
-        compositeCheckbox.checked = false;
-        simplePhraseFields.style.display = "block";
-        compositePhraseFields.style.display = "none";
-        simpleFieldType.value = phrase.type;
-        document.getElementById("simplePlaceholder").value = phrase.placeholder || "";
-        document.getElementById("simpleDefault").value = phrase.default || "";
-        if (phrase.type === "select") {
-          simpleOptionsContainer.style.display = "block";
-          document.getElementById("simpleOptions").value = phrase.options ? phrase.options.join(", ") : "";
-        } else {
-          simpleOptionsContainer.style.display = "none";
-        }
-      }
-      showPhraseFormModal();
-    }
-    phraseForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const name = phraseNameInput.value.trim();
-      if (!name) return;
-      let newPhrase;
-      if (!compositeCheckbox.checked) {
-        const type = simpleFieldType.value;
-        const placeholder = document.getElementById("simplePlaceholder").value;
-        const def = document.getElementById("simpleDefault").value;
-        if (type === "select") {
-          const options = document.getElementById("simpleOptions").value.split(",").map(s => s.trim()).filter(s => s);
-          newPhrase = { type, placeholder, default: def, options };
-        } else {
-          newPhrase = { type, placeholder, default: def };
-        }
-      } else {
-        const fields = [];
-        const fieldRows = compositeFieldsContainer.querySelectorAll(".field-row");
-        fieldRows.forEach(row => {
-          const label = row.querySelector(".field-label").value.trim();
-          if (!label) return;
-          const type = row.querySelector(".field-type").value;
-          const placeholder = row.querySelector(".field-placeholder").value;
-          const def = row.querySelector(".field-default").value;
-          const multiple = row.querySelector(".field-multiple") ? row.querySelector(".field-multiple").checked : false;
-          let fieldObj = { label, type, placeholder, default: def };
-          if (type === "select") {
-            const options = row.querySelector(".field-options").value.split(",").map(s => s.trim()).filter(s => s);
-            fieldObj.options = options;
-            fieldObj.multiple = multiple;
-          }
-          fields.push(fieldObj);
-        });
-        const template = insertionTemplateInput.value.trim();
-        if (template) {
-          newPhrase = { fields, template };
-        } else {
-          newPhrase = { fields, previewTemplate: (vals) => vals.join(" ") };
-        }
-      }
-      // New fields for section and visibility.
-      const section = phraseSectionInput.value.trim();
-      const visible = phraseVisibleInput.checked;
-      newPhrase.section = section;
-      newPhrase.visible = visible;
-      if (!editingPhraseKey) {
-        newPhrase.order = Date.now();
-      } else {
-        newPhrase.order = predefinedPhrases[editingPhraseKey].order || Date.now();
-      }
-      if (editingPhraseKey && editingPhraseKey !== name) {
-        delete predefinedPhrases[editingPhraseKey];
-      }
-      predefinedPhrases[name] = newPhrase;
-      renderPhraseList();
-      generatePhraseButtons();
-      hidePhraseFormModal();
-      phraseForm.reset();
     });
   </script>
 </body>

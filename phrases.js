@@ -1,4 +1,4 @@
-const predefinedPhrases = {
+let predefinedPhrases = {
   "dispatch info": {
     "fields": [
       {
