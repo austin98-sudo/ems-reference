@@ -5,7 +5,10 @@
   <title>Narrative, Phrase & Template Manager</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <style>
-   /* Basic resets and fonts */
+    @font-face {
+      font-family: "open-sans";
+      src: url("./OpenSans-SemiBold.ttf");
+    }
    body {
       font-family: 'Roboto', sans-serif;
       margin: 0;
@@ -19,7 +22,6 @@
     select {
       font-size: 1.25em;
     }
-    /* Tab Navigation */
     #tabs {
       display: flex;
       background: #fff;
@@ -41,7 +43,6 @@
       border-bottom: 2px solid #4a90e2;
       font-weight: bold;
     }
-    /* Containers */
     .container, .container-grid {
       display: none;
       padding: 20px;
@@ -49,17 +50,18 @@
     .container.active, .container-grid.active {
       display: block;
     }
-    /* Narrative Tab: 75% textarea, 25% custom phrases */
     #narrativeTab {
       display: grid;
       grid-template-columns: 75% 25%;
       grid-column-gap: 10px;
     }
     textarea {
+      font-family: open-sans;
+    line-height: 25px;
       width: 100%;
       height: 550px;
       padding: 15px;
-      font-size: 1em;
+      font-size: 14px;
       border: 1px solid #ccc;
       border-radius: 8px;
       resize: vertical;
@@ -81,9 +83,8 @@
     button.move-up, button.move-down,button.remove-field {
       margin-top: 0;
     }
-    /* Custom Phrases column */
     .phrases-container {
-      height: 550px;
+      height: 90%;
       overflow-y: auto;
     }
     .phrase {
@@ -99,7 +100,6 @@
     .phrase:hover {
       background: #d8e2ed;
     }
-    /* Collapsible Sections */
     .collapsible-header {
       cursor: pointer;
       background: #ddd;
@@ -118,7 +118,6 @@
     .arrow {
       font-size: 0.75em;
     }
-    /* Phrase and Template Manager List */
     #phraseList, #templateList {
       margin-top: 20px;
     }
@@ -148,7 +147,6 @@
     .phrase-actions button.delete {
       background: #e74c3c;
     }
-    /* Table layout for composite fields in phrase editor */
     table.fields-table {
       width: 100%;
       border-collapse: collapse;
@@ -166,7 +164,6 @@
     table.fields-table input {
       margin: 0;
     }
-    /* Modal styles */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -189,7 +186,6 @@
       overflow-y: scroll;
       max-height: 90%;
     }
-    /* Make phrase form modal wider */
     #phraseFormModal .modal {
       width: 90%;
       max-width: 90%;
@@ -207,9 +203,6 @@
       font-size: 1em;
       box-sizing: border-box;
     }
-    /* .modal button {
-      width: 48%;
-    } */
     .modal-buttons {
       display: flex;
       justify-content: space-between;
@@ -254,6 +247,7 @@
   <div id="templateManagerTab" class="container">
     <h2>Template Manager</h2>
     <button id="createTemplateBtn">Create New Template</button>
+    <!-- <button id="exportTemplatesBtn">Export Templates</button> -->
     <button id="exportTemplatesBtn">Export Templates</button>
     <div id="templateList">
       <!-- List of templates with Use/Edit/Delete/Reorder actions will be shown here -->
@@ -352,46 +346,6 @@
   </div>
 
   <script>
-    /***** Global Data and Persistence *****/
-    // let predefinedPhrases = {
-    //   "dispatch info": {
-    //     template: "{0} was dispatched for {1}.",
-    //     order: 1000,
-    //     visible: true,
-    //     section: "Pre-Generated"
-    //   },
-    //   "complaints": {
-    //     template: "Pt presents with {0}.",
-    //     order: 2000,
-    //     visible: true,
-    //     section: "Pre-Generated"
-    //   }
-    // };
-    // let narrativeTemplates = {
-    //   "Default Template": {
-    //     content: "D- {dispatch info}.\n\nC- {complaints}\n\nH- \n\nA- {arrival}\n\nABC: {abc}\nNEURO: {neuro}",
-    //     order: 1000
-    //   }
-    // };
-    // function loadPhrases() {
-    //   const stored = localStorage.getItem('predefinedPhrases');
-    //   if (stored) {
-    //     predefinedPhrases = JSON.parse(stored);
-    //   }
-    // }
-    // function savePhrases() {
-    //   localStorage.setItem('predefinedPhrases', JSON.stringify(predefinedPhrases));
-    // }
-    // function loadTemplates() {
-    //   const stored = localStorage.getItem('narrativeTemplates');
-    //   if (stored) {
-    //     narrativeTemplates = JSON.parse(stored);
-    //   }
-    // }
-    // function saveTemplates() {
-    //   localStorage.setItem('narrativeTemplates', JSON.stringify(narrativeTemplates));
-    // }
-
     /***** Tab Navigation *****/
     const narrativeTabBtn = document.getElementById("narrativeTabBtn");
     const phraseTabBtn = document.getElementById("phraseTabBtn");
@@ -1179,11 +1133,8 @@
         });
       }
     }
-
     /***** Initialization *****/
     document.addEventListener("DOMContentLoaded", () => {
-      // loadPhrases();
-      // loadTemplates();
       generatePhraseButtons();
     });
   </script>

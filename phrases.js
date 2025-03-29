@@ -44,7 +44,7 @@ let predefinedPhrases = {
         "default": "",
         "options": [
           "emergent",
-          "Non-emergent"
+          "non-emergent"
         ],
         "multiple": false
       },
@@ -176,6 +176,12 @@ let predefinedPhrases = {
   "neuro": {
     "fields": [
       {
+        "label": "AAO",
+        "type": "input",
+        "placeholder": "",
+        "default": "Pt is alert and oriented to person, place, time, and event"
+      },
+      {
         "label": "GCS",
         "type": "input",
         "placeholder": "E: 4, V: 5, M: 6",
@@ -188,7 +194,7 @@ let predefinedPhrases = {
         "default": "No facial droop or slurred speech noted"
       }
     ],
-    "template": "GCS is {0}. {1}",
+    "template": "{0}. GCS is {1}. {2}",
     "section": "Pre-Generated",
     "visible": false,
     "order": 6000,
@@ -414,6 +420,7 @@ let predefinedPhrases = {
         "default": "",
         "options": [
           "stand and pivot",
+          "walking",
           "sliding",
           "draw sheet"
         ],
@@ -488,7 +495,7 @@ let predefinedPhrases = {
     "template": "Monitor was synchronized and Pt was cardioverted at {0}",
     "section": "Procedure",
     "visible": true,
-    "order": 1740625260759,
+    "order": 1741102227469,
     "name": "synchronized cardioversion"
   },
   "adenosine": {
@@ -545,7 +552,7 @@ let predefinedPhrases = {
     "template": "A 12-lead was performed and interpreted as {0}.",
     "section": "Procedure",
     "visible": true,
-    "order": 1741102227469,
+    "order": 1741102314309,
     "name": "12-lead"
   },
   "BGL": {
@@ -560,7 +567,7 @@ let predefinedPhrases = {
     "template": "A blood glucose analysis was performed and noted to be {0}mg/dL.",
     "section": "Procedure",
     "visible": true,
-    "order": 1741102314309,
+    "order": 1741214923455,
     "name": "BGL"
   },
   "abd/gi/gu": {
@@ -589,5 +596,94 @@ let predefinedPhrases = {
     "visible": false,
     "order": 10000,
     "name": "abd/gi/gu"
+  },
+  "witness": {
+    "fields": [
+      {
+        "label": "Relation",
+        "type": "input",
+        "placeholder": "husband, girlfriend, healthcare worker",
+        "default": ""
+      }
+    ],
+    "template": "Pt's {0} signed as a witness. The Pt's {0} was also advised that if anything changed they could call 911.",
+    "section": "Pre-Generated",
+    "visible": false,
+    "order": 1741214644124,
+    "name": "witness"
+  },
+  "intubation": {
+    "fields": [
+      {
+        "label": "Method",
+        "type": "select",
+        "placeholder": "",
+        "default": "",
+        "options": [
+          "a king vision",
+          "direct laryngoscopy"
+        ],
+        "multiple": false
+      },
+      {
+        "label": "Size ET",
+        "type": "input",
+        "placeholder": "7.0, 7.5 ",
+        "default": ""
+      }
+    ],
+    "template": "Pt was intubated using {0}. A size {1} ET Tube was advanced through the vocal cord. ET Tube balloon was inflated and blade was retracted. ET Tube was secured with a tube holder.",
+    "section": "Procedure",
+    "visible": true,
+    "order": 1741215680844,
+    "name": "intubation"
+  },
+  "io": {
+    "fields": [
+      {
+        "label": "IO Size",
+        "type": "select",
+        "placeholder": "",
+        "default": "",
+        "options": [
+          "15mm",
+          "25mm",
+          "45mm"
+        ],
+        "multiple": false
+      },
+      {
+        "label": "Site",
+        "type": "input",
+        "placeholder": "proximal tibia, humerus",
+        "default": ""
+      }
+    ],
+    "template": "A {0} was inserted in the {1}. Extension set was connected and IO was flushed with 10mLs of NS.",
+    "section": "Procedure",
+    "visible": true,
+    "order": 1740625260759,
+    "name": "io"
+  },
+  "asa": {
+    "fields": [
+      {
+        "label": "how many?",
+        "type": "input",
+        "placeholder": "",
+        "default": "4"
+      },
+      {
+        "label": "total dosage",
+        "type": "input",
+        "placeholder": "",
+        "default": "324"
+      }
+    ],
+    "template": "{0} x 81mg of baby aspirin was administered for a total of {1}",
+    "section": "Medication",
+    "visible": true,
+    "order": 1741215784421,
+    "name": "asa"
   }
-};
+}
