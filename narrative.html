@@ -9,6 +9,11 @@
       font-family: "open-sans";
       src: url("./OpenSans-SemiBold.ttf");
     }
+
+    * {
+      font-family: open-sans;
+    }
+
    body {
       font-family: 'Roboto', sans-serif;
       margin: 0;
@@ -57,7 +62,7 @@
     }
     textarea {
       font-family: open-sans;
-    line-height: 25px;
+      line-height: 25px;
       width: 100%;
       height: 550px;
       padding: 15px;
@@ -82,6 +87,9 @@
     }
     button.move-up, button.move-down,button.remove-field {
       margin-top: 0;
+    }
+    .remove-field {
+      background-color: #e74c3c;
     }
     .phrases-container {
       height: 90%;
@@ -207,6 +215,10 @@
       display: flex;
       justify-content: space-between;
     }
+    .table-button-group {
+      display: flex;
+      gap: 5px;
+    }
   </style>
   <script src="./phrases.js"></script>
   <script src="./templates.js"></script>
@@ -247,7 +259,6 @@
   <div id="templateManagerTab" class="container">
     <h2>Template Manager</h2>
     <button id="createTemplateBtn">Create New Template</button>
-    <!-- <button id="exportTemplatesBtn">Export Templates</button> -->
     <button id="exportTemplatesBtn">Export Templates</button>
     <div id="templateList">
       <!-- List of templates with Use/Edit/Delete/Reorder actions will be shown here -->
@@ -281,7 +292,7 @@
             <label>Phrase Template:</label>
             <input type="text" id="phraseTemplate" placeholder="Enter phrase template" />
           </div>
-          <div>
+          <div style="display:none">
             <label>Composite Phrase?</label>
             <input type="checkbox" id="compositeCheckbox" />
           </div>
@@ -703,7 +714,6 @@
           deleteBtn.addEventListener("click", () => {
             if (confirm(`Delete phrase "${ph.name}"?`)) {
               delete predefinedPhrases[ph.name];
-              // savePhrases();
               renderPhraseList();
               generatePhraseButtons();
             }
@@ -751,7 +761,6 @@
       arr[newIndex].order = temp;
       predefinedPhrases[arr[idx].name].order = arr[idx].order;
       predefinedPhrases[arr[newIndex].name].order = arr[newIndex].order;
-      // savePhrases();
       renderPhraseList();
       generatePhraseButtons();
     }
@@ -791,8 +800,11 @@
       window.editingPhraseKey = null;
       document.getElementById("formTitle").textContent = "Create New Phrase";
       document.getElementById("phraseForm").reset();
-      document.getElementById("simplePhraseFields").style.display = "block";
-      document.getElementById("compositePhraseFields").style.display = "none";
+      document.getElementById("fieldsTableBody").innerHTML = ""; // Clear previous composite fields
+      // Force composite checkbox to be checked and adjust field visibility accordingly
+      document.getElementById("compositeCheckbox").checked = true;
+      document.getElementById("simplePhraseFields").style.display = "none";
+      document.getElementById("compositePhraseFields").style.display = "block";
       document.getElementById("phraseFormModal").style.display = "flex";
     });
 
@@ -826,9 +838,9 @@
         <td><input type="text" class="field-default" value="${rowData && rowData.default ? rowData.default : ''}" /></td>
         <td><input type="text" class="field-options" value="${rowData && rowData.options ? rowData.options.join(", ") : ''}" /></td>
         <td>
-          <button type="button" class="move-up" title="Move Up">&#x25B2;</button>
+          <div class="table-button-group"><button type="button" class="move-up" title="Move Up">&#x25B2;</button>
           <button type="button" class="move-down" title="Move Down">&#x25BC;</button>
-          <button type="button" class="remove-field">Remove</button>
+          <button type="button" class="remove-field">Remove</button></div>
         </td>
       `;
       if (rowData && rowData.type) {
@@ -908,7 +920,6 @@
         delete predefinedPhrases[window.editingPhraseKey];
       }
       predefinedPhrases[name] = newPhrase;
-      // savePhrases();
       renderPhraseList();
       generatePhraseButtons();
       document.getElementById("phraseFormModal").style.display = "none";
@@ -950,7 +961,6 @@
         deleteBtn.addEventListener("click", () => {
           if (confirm(`Delete template "${tpl.name}"?`)) {
             delete narrativeTemplates[tpl.name];
-            // saveTemplates();
             renderTemplateList();
           }
         });
@@ -989,7 +999,6 @@
       arr[newIndex].order = temp;
       narrativeTemplates[arr[idx].name].order = arr[idx].order;
       narrativeTemplates[arr[newIndex].name].order = arr[newIndex].order;
-      // saveTemplates();
       renderTemplateList();
     }
     function showTemplateEditModal(key) {
@@ -1010,7 +1019,6 @@
         let order = tpl.order;
         delete narrativeTemplates[key];
         narrativeTemplates[newName] = { content: newContent, order: order };
-        // saveTemplates();
         renderTemplateList();
         closeModal();
       };
@@ -1032,7 +1040,6 @@
         const newContent = document.getElementById("templateContentCreate").value;
         if (!newName) return;
         narrativeTemplates[newName] = { content: newContent, order: Date.now() };
-        // saveTemplates();
         renderTemplateList();
         closeModal();
       };
@@ -1117,7 +1124,7 @@
           inputElement.value = phraseData.default;
         }
         showModal(`Enter value for ${key}`, inputElement, () => {
-          let selectedValue = (phraseData.multiple) ?
+          const selectedValue = (phraseData.multiple) ?
             Array.from(inputElement.selectedOptions).map(opt => opt.value).join(", ") :
             inputElement.value;
           insertAtCursor(narrativeField, selectedValue);
